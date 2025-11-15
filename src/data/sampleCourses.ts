@@ -1,0 +1,101 @@
+﻿export const sampleCourses = [
+  {
+    id: "1",
+    slug: "react-mastery",
+    title: "React Mastery: From Zero to Hero",
+    description: "Master React 18, Next.js 14, and modern web development with hands-on projects",
+    price: 4999,
+    thumbnail: "/images/react-course.jpg",
+    level: "Intermediate",
+    duration: "40 hours",
+    rating: 4.8,
+    enrolled_count: 2341,
+    tags: ["React", "Next.js", "TypeScript", "Tailwind"],
+    tutor: {
+      name: "Alex Johnson",
+      avatar: "/images/alex.jpg",
+      bio: "Senior React Developer with 10+ years experience",
+      expertise: ["React", "Node.js", "TypeScript"],
+    },
+    modules: [
+      {
+        id: "m1",
+        title: "Getting Started with React",
+        lessons: [
+          { id: "l1", title: "Introduction", duration: "10 min" },
+          { id: "l2", title: "JSX Fundamentals", duration: "15 min" },
+          { id: "l3", title: "Components & Props", duration: "20 min" },
+        ],
+      },
+      {
+        id: "m2",
+        title: "Advanced React Patterns",
+        lessons: [
+          { id: "l4", title: "Custom Hooks", duration: "25 min" },
+          { id: "l5", title: "Context API", duration: "30 min" },
+          { id: "l6", title: "Performance Optimization", duration: "35 min" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "2",
+    slug: "ai-fundamentals",
+    title: "AI & Machine Learning Fundamentals",
+    description: "Learn AI/ML from scratch with Python, TensorFlow, and real-world projects",
+    price: 5999,
+    thumbnail: "/images/ai-course.jpg",
+    level: "Beginner",
+    duration: "60 hours",
+    rating: 4.9,
+    enrolled_count: 1856,
+    tags: ["Python", "TensorFlow", "Machine Learning", "Neural Networks"],
+    tutor: {
+      name: "Dr. Sarah Chen",
+      avatar: "/images/sarah.jpg",
+      bio: "AI Research Scientist at Tech Giant",
+      expertise: ["Machine Learning", "Deep Learning", "Computer Vision"],
+    },
+    modules: [
+      {
+        id: "m1",
+        title: "Introduction to AI",
+        lessons: [
+          { id: "l1", title: "What is AI?", duration: "15 min" },
+          { id: "l2", title: "History of AI", duration: "20 min" },
+          { id: "l3", title: "AI Applications", duration: "25 min" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "3",
+    slug: "ui-ux-design",
+    title: "UI/UX Design Masterclass",
+    description: "Create stunning interfaces with Figma, design systems, and user research",
+    price: 3999,
+    thumbnail: "/images/design-course.jpg",
+    level: "Beginner",
+    duration: "35 hours",
+    rating: 4.7,
+    enrolled_count: 3124,
+    tags: ["Figma", "Design Systems", "Prototyping", "User Research"],
+    tutor: {
+      name: "Maya Patel",
+      avatar: "/images/maya.jpg",
+      bio: "Product Designer at Silicon Valley Startup",
+      expertise: ["UI Design", "UX Research", "Prototyping"],
+    },
+    modules: [
+      {
+        id: "m1",
+        title: "Design Fundamentals",
+        lessons: [
+          { id: "l1", title: "Color Theory", duration: "20 min" },
+          { id: "l2", title: "Typography", duration: "25 min" },
+          { id: "l3", title: "Layout Principles", duration: "30 min" },
+        ],
+      },
+    ],
+  },
+]
