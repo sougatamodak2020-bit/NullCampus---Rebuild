@@ -2,13 +2,13 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import Providers from '@/components/layout/Providers'
+import ClientProviders from '@/components/ClientProviders'  // ← Client Component
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'NullCampus - Learn Anything, Anytime',
-  description: 'Your gateway to premium online education',
+  title: 'NullCampus',
+  description: 'Learn with 3D & AI',
 }
 
 export default function RootLayout({
@@ -19,9 +19,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <Providers>{children}</Providers>
+        <ClientProviders>
+          {children}
+        </ClientProviders>
       </body>
     </html>
   )
 }
-
