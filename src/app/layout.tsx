@@ -1,39 +1,26 @@
-﻿import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import Navbar from "@/components/Navbar";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { Providers } from "@/components/layout/Providers";
-import { Toaster } from "react-hot-toast";
+﻿// src/app/layout.tsx
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
+import Providers from '@/components/layout/Providers'
 
-const inter = Inter({ 
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: "NullCampus - Learn Without Limits",
-  description: "Transform your skills with expert-led courses",
-};
+  title: 'NullCampus - Learn Anything, Anytime',
+  description: 'Your gateway to premium online education',
+}
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} antialiased`}>
-        <Providers>
-          <AuthProvider>
-            <Navbar />
-            <main className="pt-16">
-              {children}
-            </main>
-            <Toaster position="top-center" />
-          </AuthProvider>
-        </Providers>
+      <body className={inter.className}>
+        <Providers>{children}</Providers>
       </body>
     </html>
-  );
+  )
 }
