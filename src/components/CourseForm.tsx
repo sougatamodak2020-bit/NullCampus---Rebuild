@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -13,48 +13,78 @@ import { Plus, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 
-const schema = z.object({
-  title: z.string().min(3),
-  description: z.string().min(10),
-  price: z.coerce.number().positive(),
-  level: z.enum(['Beginner', 'Intermediate', 'Advanced']),
-  duration: z.string(),
-  thumbnail: z.string().url(),
-  video_url: z.string().url(),
-  tags: z.array(z.string()).default([]),
-});
+// === 1. Define Level Enum ===
+const LEVELS = ['Beginner', 'Intermediate', 'Advanced'] as const;
+type Level = typeof LEVELS[number];
 
+// === 2. Module Interface ===
 interface Module {
   title: string;
   description: string;
   duration: string;
 }
 
+// === 3. Zod Schema ===
+// Form schema with explicit types
+const schema = z.object({
+  title: z.string().min(3, 'Title must be at least 3 characters'),
+  description: z.string().min(10, 'Description too short'),
+  price: z.coerce.number().positive('Price must be positive'),
+  level: z.enum(LEVELS),
+  duration: z.string().min(1, 'Duration required'),
+  thumbnail: z.string().url('Invalid thumbnail URL'),
+  video_url: z.string().url('Invalid video URL'),
+  tags: z.array(z.string()).default([]),
+});
+
+// === 4. Infer Type ===
+type FormData = z.infer<typeof schema>;
+
 export default function CourseForm() {
   const [modules, setModules] = useState<Module[]>([]);
   const router = useRouter();
 
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm({
-    resolver: zodResolver(schema),
+  // === 5. useForm WITH GENERIC TYPE ===
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({
+    resolver: zodResolver(schema) as any, // ? EXACT MATCH
+    defaultValues: {
+      level: 'Beginner',
+      price: 999,
+      tags: [],
+    },
   });
 
-  const onSubmit = async (data: any) => {
-    const res = await fetch('/api/courses', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...data, modules }),
-    });
+  // === 6. onSubmit WITH CORRECT TYPE ===
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
+    try {
+      const res = await fetch('/api/courses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, modules }),
+      });
 
-    if (res.ok) {
-      toast.success('Course created!');
-      router.push('/courses');
-    } else {
-      toast.error('Failed');
+      if (res.ok) {
+        toast.success('Course created!');
+        router.push('/courses');
+      } else {
+        toast.error('Failed to create course');
+      }
+    } catch {
+      toast.error('Network error');
     }
   };
 
   const addModule = () => {
     setModules([...modules, { title: '', description: '', duration: '' }]);
+  };
+
+  const removeModule = (index: number) => {
+    setModules(modules.filter((_, i) => i !== index));
   };
 
   return (
@@ -65,43 +95,57 @@ export default function CourseForm() {
         <div className="grid md:grid-cols-2 gap-4">
           <div>
             <label className="block font-medium mb-1">Title</label>
-            <Input {...register('title')} />
+            <Input {...register('title')} placeholder="React Mastery Pro" />
             {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
           </div>
+
           <div>
-            <label className="block font-medium mb-1">Price (₹)</label>
-            <Input type="number" {...register('price')} />
+            <label className="block font-medium mb-1">Price (?)</label>
+            <Input type="number" {...register('price')} placeholder="999" />
+            {errors.price && <p className="text-red-500 text-sm">{errors.price.message}</p>}
           </div>
+
           <div>
             <label className="block font-medium mb-1">Level</label>
-            <Select onValueChange={(v) => setValue('level', v)}>
-              <SelectTrigger><SelectValue placeholder="Select level" /></SelectTrigger>
+            <Select onValueChange={(v) => setValue('level', v as Level)} defaultValue="Beginner">
+              <SelectTrigger>
+                <SelectValue placeholder="Select level" />
+              </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Beginner">Beginner</SelectItem>
-                <SelectItem value="Intermediate">Intermediate</SelectItem>
-                <SelectItem value="Advanced">Advanced</SelectItem>
+                {LEVELS.map((level) => (
+                  <SelectItem key={level} value={level}>
+                    {level}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
+            {errors.level && <p className="text-red-500 text-sm">{errors.level.message}</p>}
           </div>
+
           <div>
             <label className="block font-medium mb-1">Duration</label>
-            <Input {...register('duration')} placeholder="12 hours" />
+            <Input {...register('duration')} placeholder="15 hours" />
+            {errors.duration && <p className="text-red-500 text-sm">{errors.duration.message}</p>}
           </div>
         </div>
 
         <div className="mt-4">
           <label className="block font-medium mb-1">Description</label>
-          <Textarea {...register('description')} rows={3} />
+          <Textarea {...register('description')} rows={3} placeholder="Learn React from zero to hero..." />
+          {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
         </div>
 
         <div className="grid md:grid-cols-2 gap-4 mt-4">
           <div>
             <label className="block font-medium mb-1">Thumbnail URL</label>
-            <Input {...register('thumbnail')} />
+            <Input {...register('thumbnail')} placeholder="https://images.unsplash.com/..." />
+            {errors.thumbnail && <p className="text-red-500 text-sm">{errors.thumbnail.message}</p>}
           </div>
+
           <div>
             <label className="block font-medium mb-1">Intro Video URL</label>
-            <Input {...register('video_url')} />
+            <Input {...register('video_url')} placeholder="https://youtube.com/watch?v=..." />
+            {errors.video_url && <p className="text-red-500 text-sm">{errors.video_url.message}</p>}
           </div>
         </div>
 
@@ -112,6 +156,7 @@ export default function CourseForm() {
               <Plus className="w-4 h-4 mr-1" /> Add Module
             </Button>
           </div>
+
           {modules.map((mod, i) => (
             <Card key={i} className="p-4 mb-3">
               <div className="flex gap-2 mb-2">
@@ -128,7 +173,7 @@ export default function CourseForm() {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  onClick={() => setModules(modules.filter((_, idx) => idx !== i))}
+                  onClick={() => removeModule(i)}
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -142,12 +187,25 @@ export default function CourseForm() {
                   setModules(newMods);
                 }}
               />
+              <Input
+                placeholder="Duration (e.g. 2 hours)"
+                className="mt-2"
+                value={mod.duration}
+                onChange={(e) => {
+                  const newMods = [...modules];
+                  newMods[i].duration = e.target.value;
+                  setModules(newMods);
+                }}
+              />
             </Card>
           ))}
         </div>
 
-        <Button type="submit" className="w-full mt-6">Create Course</Button>
+        <Button type="submit" disabled={isSubmitting} className="w-full mt-6">
+          {isSubmitting ? 'Creating...' : 'Create Course'}
+        </Button>
       </Card>
     </form>
   );
 }
+

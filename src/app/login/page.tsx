@@ -12,7 +12,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const { signIn } = useAuth()
+  const { signIn } = useAuth()  // Use signIn instead of login
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {

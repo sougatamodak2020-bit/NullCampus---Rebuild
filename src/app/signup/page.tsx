@@ -12,7 +12,7 @@ export default function SignUpPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const { signUp } = useAuth()
+  const { signUp } = useAuth()  // Use signUp from AuthContext
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {

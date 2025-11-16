@@ -1,4 +1,7 @@
-'use client'
+﻿'use client'
+
+
+export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
@@ -9,7 +12,15 @@ import { useAuth } from '@/contexts/AuthContext'
 export default function CreateAccountPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user, updateProfile } = useAuth()
+  // Safe auth hook usage
+  const authContext = (() => {
+    try {
+      return useAuth()
+    } catch {
+      return { user: null, login: async () => {}, logout: () => {}, isAuthenticated: false }
+    }
+  })()
+  const { user, login, logout, isAuthenticated } = authContext
   const referralCode = searchParams.get('ref')
 
   const [loading, setLoading] = useState(false)
@@ -335,3 +346,6 @@ export default function CreateAccountPage() {
     </div>
   )
 }
+
+
+

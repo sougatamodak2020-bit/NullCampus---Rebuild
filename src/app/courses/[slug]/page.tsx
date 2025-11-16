@@ -1,614 +1,601 @@
-'use client'
+﻿'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
-import { useParams, useRouter } from 'next/navigation'
-import { Clock, Users, Star, CheckCircle, PlayCircle, Award, ArrowLeft, Globe, Infinity as InfinityIcon, Smartphone, Download, TrendingUp, ShoppingCart, BookOpen, Video, FileText, MessageCircle } from 'lucide-react'
-import { coursesData } from '@/data/courses'
-import dynamic from 'next/dynamic'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { notFound, useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { 
+  ArrowLeft, Clock, Users, Star, Award, Globe, PlayCircle, 
+  CheckCircle, Lock, BookOpen, Video, Download, FileCheck,
+  TrendingUp, Zap, Heart, Share2, ShoppingCart, Sparkles
+} from 'lucide-react'
+import toast from 'react-hot-toast'
 
-// Dynamically import Three.js components to avoid SSR issues
-const Canvas = dynamic(() => import('@react-three/fiber').then(mod => mod.Canvas), { ssr: false })
-const OrbitControls = dynamic(() => import('@react-three/drei').then(mod => mod.OrbitControls), { ssr: false })
-const Float = dynamic(() => import('@react-three/drei').then(mod => mod.Float), { ssr: false })
-const Box = dynamic(() => import('@react-three/drei').then(mod => mod.Box), { ssr: false })
-const Sphere = dynamic(() => import('@react-three/drei').then(mod => mod.Sphere), { ssr: false })
-
-
-// 3D Course Card Component
-function AnimatedCourseCard() {
-  const meshRef = useRef<any>(null)
-  const [hovered, setHovered] = useState(false)
-
-  // Animation frame
-  useEffect(() => {
-    if (!meshRef.current) return
-    const animate = () => {
-      if (meshRef.current) {
-        meshRef.current.rotation.y += 0.01
-        meshRef.current.position.y = Math.sin(Date.now() * 0.001) * 0.1
+// Complete course data for all 6 courses
+const coursesData = {
+  'web-development-masterclass': {
+    id: '1',
+    slug: 'web-development-masterclass',
+    title: 'Web Development Masterclass',
+    subtitle: 'From Zero to Full-Stack Developer',
+    description: 'Master the art of web development with this comprehensive course covering HTML, CSS, JavaScript, React, Next.js, and modern development practices.',
+    longDescription: 'Start your journey to becoming a professional web developer. This course takes you from complete beginner to job-ready developer with hands-on projects and real-world applications.',
+    thumbnail: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1200&q=80',
+    price: 4999,
+    originalPrice: 9999,
+    duration: '40 hours',
+    lessons: 120,
+    enrolled: 2500,
+    rating: 4.8,
+    reviews: 450,
+    level: 'Beginner',
+    language: 'English',
+    lastUpdated: 'November 2024',
+    category: 'Development',
+    trending: true,
+    instructor: {
+      name: 'John Doe',
+      title: 'Senior Full-Stack Developer',
+      avatar: 'https://ui-avatars.com/api/?name=John+Doe&background=6366f1&color=fff&size=200',
+      bio: '10+ years of experience in web development. Worked with Fortune 500 companies.',
+      rating: 4.9,
+      students: 15000,
+      courses: 8
+    },
+    features: [
+      'Lifetime access to course materials',
+      'Certificate of completion',
+      'Downloadable resources',
+      '30-day money back guarantee',
+      'Access on mobile and TV',
+      'Full source code included'
+    ],
+    requirements: [
+      'No programming experience required',
+      'A computer with internet access',
+      'Motivation to learn'
+    ],
+    whatYouLearn: [
+      'Build 10+ real-world web applications',
+      'Master HTML5, CSS3, and JavaScript ES6+',
+      'Create responsive layouts with Flexbox and Grid',
+      'Build dynamic apps with React and Next.js',
+      'Deploy projects to production',
+      'Best practices and industry standards'
+    ],
+    curriculum: [
+      {
+        id: 1,
+        title: 'Getting Started',
+        duration: '2 hours',
+        lessons: [
+          { title: 'Course Introduction', duration: '5:00', preview: true },
+          { title: 'Setting Up Your Development Environment', duration: '15:00', preview: true },
+          { title: 'How the Web Works', duration: '20:00', preview: false },
+          { title: 'Your First Web Page', duration: '25:00', preview: false }
+        ]
+      },
+      {
+        id: 2,
+        title: 'HTML & CSS Fundamentals',
+        duration: '8 hours',
+        lessons: [
+          { title: 'HTML Structure and Semantics', duration: '45:00', preview: false },
+          { title: 'CSS Styling Basics', duration: '50:00', preview: false },
+          { title: 'Flexbox Layout', duration: '40:00', preview: false },
+          { title: 'CSS Grid System', duration: '35:00', preview: false }
+        ]
+      },
+      {
+        id: 3,
+        title: 'JavaScript Programming',
+        duration: '12 hours',
+        lessons: [
+          { title: 'JavaScript Basics', duration: '60:00', preview: false },
+          { title: 'Functions and Scope', duration: '45:00', preview: false },
+          { title: 'DOM Manipulation', duration: '50:00', preview: false },
+          { title: 'Async JavaScript', duration: '55:00', preview: false }
+        ]
+      },
+      {
+        id: 4,
+        title: 'React & Next.js',
+        duration: '18 hours',
+        lessons: [
+          { title: 'React Fundamentals', duration: '90:00', preview: false },
+          { title: 'State Management', duration: '60:00', preview: false },
+          { title: 'Next.js Introduction', duration: '70:00', preview: false },
+          { title: 'Building Full-Stack Apps', duration: '120:00', preview: false }
+        ]
       }
-      requestAnimationFrame(animate)
-    }
-    animate()
-  }, [])
+    ]
+  },
 
-  return (
-    <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
-      <group
-        ref={meshRef}
-        onPointerEnter={() => setHovered(true)}
-        onPointerLeave={() => setHovered(false)}
-        scale={hovered ? 1.1 : 1}
-      >
-        {/* Book/Course representation */}
-        <Box args={[2, 2.8, 0.3]} position={[0, 0, 0]}>
-          <meshStandardMaterial color="#4f46e5" roughness={0.3} metalness={0.5} />
-        </Box>
-
-        {/* Pages effect */}
-        {[...Array(5)].map((_, i) => (
-          <Box
-            key={i}
-            args={[1.9, 2.7, 0.02]}
-            position={[-0.05 * i, 0, 0.15 + i * 0.01]}
-          >
-            <meshStandardMaterial color="#ffffff" roughness={0.8} />
-          </Box>
-        ))}
-
-        {/* Glowing orbs around */}
-        <Sphere args={[0.1]} position={[1.5, 1.5, 0.5]}>
-          <meshBasicMaterial color="#a855f7" />
-        </Sphere>
-        <Sphere args={[0.08]} position={[-1.5, -1.5, 0.5]}>
-          <meshBasicMaterial color="#3b82f6" />
-        </Sphere>
-      </group>
-    </Float>
-  )
-}
-
-export default function CourseDetailPage() {
-  const params = useParams()
-  const router = useRouter()
-  const slug = params.slug as string
-  const course = coursesData[slug as keyof typeof coursesData]
-  const [showBuyModal, setShowBuyModal] = useState(false)
-  const [activeTab, setActiveTab] = useState('curriculum')
-  const [show3D, setShow3D] = useState(false)
-
-  const { scrollY } = useScroll()
-  const headerOpacity = useTransform(scrollY, [0, 200], [1, 0.8])
-  const headerScale = useTransform(scrollY, [0, 200], [1, 0.95])
-
-  // Enable 3D after mount
-  useEffect(() => {
-    setShow3D(true)
-  }, [])
-
-  if (!course) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold mb-4">Course Not Found</h1>
-          <button onClick={() => router.push('/courses')} className="text-primary-500 hover:underline">
-            Back to Courses
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  const discount = Math.round(((course.originalPrice - course.price) / course.originalPrice) * 100)
-
-  const handleBuyNow = () => {
-    setShowBuyModal(true)
-  }
-
-  const handleRazorpayPayment = async () => {
-    // Check if Razorpay is loaded
-    if (typeof window !== 'undefined' && (window as any).Razorpay) {
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'your_test_key_here',
-        amount: course.price * 100, // Amount in paise
-        currency: 'INR',
-        name: 'NullCampus',
-        description: course.title,
-        image: '/logo.png',
-        handler: function (response: any) {
-          alert('Payment successful! Payment ID: ' + response.razorpay_payment_id)
-          setShowBuyModal(false)
-          // Here you would typically verify payment on backend and grant access
-        },
-        prefill: {
-          name: '',
-          email: '',
-          contact: ''
-        },
-        theme: {
-          color: '#4f46e5'
-        }
+  'ui-ux-design-fundamentals': {
+    id: '2',
+    slug: 'ui-ux-design-fundamentals',
+    title: 'UI/UX Design Fundamentals',
+    subtitle: 'Create Beautiful and Functional Designs',
+    description: 'Master the principles of user interface and user experience design. Learn industry-standard tools and workflows.',
+    longDescription: 'From wireframing to high-fidelity prototypes, this course covers everything you need to become a professional UI/UX designer.',
+    thumbnail: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=1200&q=80',
+    price: 3999,
+    originalPrice: 7999,
+    duration: '30 hours',
+    lessons: 85,
+    enrolled: 1800,
+    rating: 4.9,
+    reviews: 320,
+    level: 'Beginner',
+    language: 'English',
+    lastUpdated: 'October 2024',
+    category: 'Design',
+    featured: true,
+    instructor: {
+      name: 'Jane Smith',
+      title: 'Senior Product Designer',
+      avatar: 'https://ui-avatars.com/api/?name=Jane+Smith&background=ec4899&color=fff&size=200',
+      bio: 'Award-winning designer with experience at Google, Apple, and Microsoft. Specialized in user-centered design.',
+      rating: 4.9,
+      students: 12000,
+      courses: 5
+    },
+    features: [
+      'Real-world design projects',
+      'Figma and Adobe XD files',
+      'Design system templates',
+      'Portfolio building guidance',
+      'Industry certificates',
+      '1-on-1 mentorship sessions'
+    ],
+    requirements: [
+      'No design experience needed',
+      'Computer with Figma (free)',
+      'Basic computer skills'
+    ],
+    whatYouLearn: [
+      'Design thinking methodology',
+      'Create wireframes and prototypes',
+      'Master color theory and typography',
+      'Build responsive designs',
+      'Conduct user research',
+      'Create design systems'
+    ],
+    curriculum: [
+      {
+        id: 1,
+        title: 'Introduction to Design',
+        duration: '3 hours',
+        lessons: [
+          { title: 'What is UI/UX Design?', duration: '15:00', preview: true },
+          { title: 'Design Thinking Process', duration: '25:00', preview: true },
+          { title: 'Setting Up Figma', duration: '10:00', preview: false },
+          { title: 'Your First Design', duration: '30:00', preview: false }
+        ]
+      },
+      {
+        id: 2,
+        title: 'Design Principles',
+        duration: '7 hours',
+        lessons: [
+          { title: 'Color Theory', duration: '45:00', preview: false },
+          { title: 'Typography Basics', duration: '40:00', preview: false },
+          { title: 'Layout and Grids', duration: '35:00', preview: false },
+          { title: 'Visual Hierarchy', duration: '30:00', preview: false }
+        ]
+      },
+      {
+        id: 3,
+        title: 'User Experience',
+        duration: '10 hours',
+        lessons: [
+          { title: 'User Research Methods', duration: '60:00', preview: false },
+          { title: 'Creating Personas', duration: '45:00', preview: false },
+          { title: 'User Journey Mapping', duration: '50:00', preview: false },
+          { title: 'Usability Testing', duration: '55:00', preview: false }
+        ]
+      },
+      {
+        id: 4,
+        title: 'Prototyping',
+        duration: '10 hours',
+        lessons: [
+          { title: 'Low-Fidelity Wireframes', duration: '40:00', preview: false },
+          { title: 'High-Fidelity Mockups', duration: '60:00', preview: false },
+          { title: 'Interactive Prototypes', duration: '70:00', preview: false },
+          { title: 'Design Handoff', duration: '50:00', preview: false }
+        ]
       }
+    ]
+  },
 
-      const razorpay = new (window as any).Razorpay(options)
-      razorpay.open()
-    } else {
-      alert('Payment system is loading. Please try again.')
-    }
+  'data-science-python': {
+    id: '3',
+    slug: 'data-science-python',
+    title: 'Data Science with Python',
+    subtitle: 'Master Data Analysis and Machine Learning',
+    description: 'Learn data analysis, visualization, and machine learning with Python. Build predictive models and gain insights from data.',
+    longDescription: 'Comprehensive data science bootcamp covering Python programming, statistics, machine learning, and deep learning with real-world projects.',
+    thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&q=80',
+    price: 5999,
+    originalPrice: 11999,
+    duration: '50 hours',
+    lessons: 150,
+    enrolled: 3200,
+    rating: 4.7,
+    reviews: 580,
+    level: 'Intermediate',
+    language: 'English',
+    lastUpdated: 'November 2024',
+    category: 'Data Science',
+    trending: true,
+    instructor: {
+      name: 'Mike Johnson',
+      title: 'Data Scientist at Microsoft',
+      avatar: 'https://ui-avatars.com/api/?name=Mike+Johnson&background=10b981&color=fff&size=200',
+      bio: 'PhD in Computer Science, specializing in Machine Learning. Published researcher with 10+ years in data science.',
+      rating: 4.8,
+      students: 20000,
+      courses: 12
+    },
+    features: [
+      'Jupyter notebooks for practice',
+      'Real datasets from Kaggle',
+      'Cloud computing credits',
+      'ML model deployment guide',
+      'Interview preparation',
+      'Job placement assistance'
+    ],
+    requirements: [
+      'Basic programming knowledge helpful',
+      'High school mathematics',
+      'Enthusiasm for data'
+    ],
+    whatYouLearn: [
+      'Python programming for data science',
+      'NumPy, Pandas, and Matplotlib',
+      'Statistical analysis and hypothesis testing',
+      'Machine learning algorithms',
+      'Deep learning with TensorFlow',
+      'Deploy ML models to production'
+    ],
+    curriculum: [
+      {
+        id: 1,
+        title: 'Python Foundations',
+        duration: '5 hours',
+        lessons: [
+          { title: 'Python Basics Review', duration: '30:00', preview: true },
+          { title: 'NumPy Arrays', duration: '45:00', preview: true },
+          { title: 'Pandas DataFrames', duration: '60:00', preview: false },
+          { title: 'Data Visualization', duration: '50:00', preview: false }
+        ]
+      },
+      {
+        id: 2,
+        title: 'Statistical Analysis',
+        duration: '10 hours',
+        lessons: [
+          { title: 'Descriptive Statistics', duration: '40:00', preview: false },
+          { title: 'Probability Distributions', duration: '50:00', preview: false },
+          { title: 'Hypothesis Testing', duration: '60:00', preview: false },
+          { title: 'Regression Analysis', duration: '70:00', preview: false }
+        ]
+      },
+      {
+        id: 3,
+        title: 'Machine Learning',
+        duration: '20 hours',
+        lessons: [
+          { title: 'Supervised Learning', duration: '90:00', preview: false },
+          { title: 'Unsupervised Learning', duration: '80:00', preview: false },
+          { title: 'Model Evaluation', duration: '60:00', preview: false },
+          { title: 'Feature Engineering', duration: '70:00', preview: false }
+        ]
+      },
+      {
+        id: 4,
+        title: 'Deep Learning',
+        duration: '15 hours',
+        lessons: [
+          { title: 'Neural Networks Basics', duration: '80:00', preview: false },
+          { title: 'Convolutional Neural Networks', duration: '90:00', preview: false },
+          { title: 'Recurrent Neural Networks', duration: '85:00', preview: false },
+          { title: 'Model Deployment', duration: '75:00', preview: false }
+        ]
+      }
+    ]
+  },
+
+  'digital-marketing-complete': {
+    id: '4',
+    slug: 'digital-marketing-complete',
+    title: 'Digital Marketing Complete Course',
+    subtitle: 'Grow Any Business with Digital Marketing',
+    description: 'Master SEO, Social Media Marketing, Email Marketing, and Content Strategy. Learn to create and execute winning marketing campaigns.',
+    longDescription: 'Become a T-shaped digital marketer with deep expertise in all channels. Learn strategies used by top companies to drive growth.',
+    thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80',
+    price: 3499,
+    originalPrice: 6999,
+    duration: '35 hours',
+    lessons: 95,
+    enrolled: 2100,
+    rating: 4.6,
+    reviews: 380,
+    level: 'Beginner',
+    language: 'English',
+    lastUpdated: 'October 2024',
+    category: 'Marketing',
+    instructor: {
+      name: 'Sarah Williams',
+      title: 'CMO & Marketing Consultant',
+      avatar: 'https://ui-avatars.com/api/?name=Sarah+Williams&background=f59e0b&color=fff&size=200',
+      bio: 'Former Head of Marketing at HubSpot. 15+ years helping startups and Fortune 500 companies grow.',
+      rating: 4.7,
+      students: 18000,
+      courses: 6
+    },
+    features: [
+      'Marketing templates and tools',
+      'Real campaign case studies',
+      'Google Ads credits ($100)',
+      'Facebook Ads guide',
+      'Email marketing templates',
+      'SEO audit checklist'
+    ],
+    requirements: [
+      'No marketing experience needed',
+      'Basic computer skills',
+      'Access to social media'
+    ],
+    whatYouLearn: [
+      'Create complete marketing strategies',
+      'Master Google Ads and Facebook Ads',
+      'SEO for top Google rankings',
+      'Content marketing that converts',
+      'Email marketing automation',
+      'Analytics and ROI measurement'
+    ],
+    curriculum: [
+      {
+        id: 1,
+        title: 'Marketing Foundations',
+        duration: '4 hours',
+        lessons: [
+          { title: 'Digital Marketing Overview', duration: '20:00', preview: true },
+          { title: 'Customer Journey Mapping', duration: '30:00', preview: true },
+          { title: 'Marketing Funnels', duration: '40:00', preview: false },
+          { title: 'Setting KPIs', duration: '35:00', preview: false }
+        ]
+      },
+      {
+        id: 2,
+        title: 'Search Engine Optimization',
+        duration: '8 hours',
+        lessons: [
+          { title: 'Keyword Research', duration: '50:00', preview: false },
+          { title: 'On-Page SEO', duration: '45:00', preview: false },
+          { title: 'Technical SEO', duration: '60:00', preview: false },
+          { title: 'Link Building Strategies', duration: '55:00', preview: false }
+        ]
+      },
+      {
+        id: 3,
+        title: 'Social Media Marketing',
+        duration: '10 hours',
+        lessons: [
+          { title: 'Facebook & Instagram Marketing', duration: '70:00', preview: false },
+          { title: 'LinkedIn for B2B', duration: '60:00', preview: false },
+          { title: 'Twitter/X Strategy', duration: '50:00', preview: false },
+          { title: 'Influencer Marketing', duration: '65:00', preview: false }
+        ]
+      },
+      {
+        id: 4,
+        title: 'Paid Advertising',
+        duration: '13 hours',
+        lessons: [
+          { title: 'Google Ads Mastery', duration: '90:00', preview: false },
+          { title: 'Facebook Ads Advanced', duration: '85:00', preview: false },
+          { title: 'Retargeting Campaigns', duration: '60:00', preview: false },
+          { title: 'Campaign Optimization', duration: '75:00', preview: false }
+        ]
+      }
+    ]
+  },
+
+  'mobile-app-development': {
+    id: '5',
+    slug: 'mobile-app-development',
+    title: 'Mobile App Development',
+    subtitle: 'Build Native Apps for iOS and Android',
+    description: 'Create professional mobile applications using React Native. Build once, deploy everywhere with modern development practices.',
+    longDescription: 'Learn to build production-ready mobile apps from scratch. Master React Native and deploy apps to Apple App Store and Google Play Store.',
+    thumbnail: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=1200&q=80',
+    price: 5499,
+    originalPrice: 10999,
+    duration: '45 hours',
+    lessons: 130,
+    enrolled: 1900,
+    rating: 4.8,
+    reviews: 340,
+    level: 'Intermediate',
+    language: 'English',
+    lastUpdated: 'November 2024',
+    category: 'Development',
+    featured: true,
+    instructor: {
+      name: 'David Brown',
+      title: 'Mobile App Developer',
+      avatar: 'https://ui-avatars.com/api/?name=David+Brown&background=3b82f6&color=fff&size=200',
+      bio: 'Built 50+ apps with millions of downloads. Expert in React Native, Swift, and Kotlin. App Store optimization specialist.',
+      rating: 4.9,
+      students: 14000,
+      courses: 7
+    },
+    features: [
+      'Build 5 complete apps',
+      'App Store deployment guide',
+      'Push notifications setup',
+      'In-app purchases integration',
+      'Analytics implementation',
+      'App monetization strategies'
+    ],
+    requirements: [
+      'Basic JavaScript knowledge',
+      'Mac for iOS development (optional)',
+      'Smartphone for testing'
+    ],
+    whatYouLearn: [
+      'React Native from scratch',
+      'Navigation and routing',
+      'State management with Redux',
+      'Native device features',
+      'App Store and Play Store publishing',
+      'App performance optimization'
+    ],
+    curriculum: [
+      {
+        id: 1,
+        title: 'React Native Basics',
+        duration: '6 hours',
+        lessons: [
+          { title: 'Setting Up Development Environment', duration: '30:00', preview: true },
+          { title: 'React Native Components', duration: '45:00', preview: true },
+          { title: 'Styling in React Native', duration: '40:00', preview: false },
+          { title: 'Handling User Input', duration: '50:00', preview: false }
+        ]
+      },
+      {
+        id: 2,
+        title: 'Navigation & State',
+        duration: '10 hours',
+        lessons: [
+          { title: 'React Navigation Setup', duration: '60:00', preview: false },
+          { title: 'Stack, Tab, and Drawer Navigation', duration: '70:00', preview: false },
+          { title: 'Redux Integration', duration: '80:00', preview: false },
+          { title: 'Context API', duration: '50:00', preview: false }
+        ]
+      },
+      {
+        id: 3,
+        title: 'Native Features',
+        duration: '14 hours',
+        lessons: [
+          { title: 'Camera and Gallery', duration: '75:00', preview: false },
+          { title: 'Geolocation and Maps', duration: '85:00', preview: false },
+          { title: 'Push Notifications', duration: '90:00', preview: false },
+          { title: 'Offline Storage', duration: '70:00', preview: false }
+        ]
+      },
+      {
+        id: 4,
+        title: 'Deployment',
+        duration: '15 hours',
+        lessons: [
+          { title: 'Building for Production', duration: '60:00', preview: false },
+          { title: 'iOS App Store Submission', duration: '90:00', preview: false },
+          { title: 'Google Play Store Submission', duration: '85:00', preview: false },
+          { title: 'App Updates and Maintenance', duration: '95:00', preview: false }
+        ]
+      }
+    ]
+  },
+
+  'cybersecurity-essentials': {
+    id: '6',
+    slug: 'cybersecurity-essentials',
+    title: 'Cybersecurity Essentials',
+    subtitle: 'Become an Ethical Hacker and Security Expert',
+    description: 'Learn to protect systems and networks from cyber threats. Master penetration testing, ethical hacking, and security best practices.',
+    longDescription: 'Comprehensive cybersecurity training from basic concepts to advanced penetration testing. Prepare for industry certifications.',
+    thumbnail: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&q=80',
+    price: 4799,
+    originalPrice: 9599,
+    duration: '38 hours',
+    lessons: 110,
+    enrolled: 1600,
+    rating: 4.7,
+    reviews: 290,
+    level: 'Advanced',
+    language: 'English',
+    lastUpdated: 'November 2024',
+    category: 'Security',
+    instructor: {
+      name: 'Emily Davis',
+      title: 'Senior Security Consultant',
+      avatar: 'https://ui-avatars.com/api/?name=Emily+Davis&background=dc2626&color=fff&size=200',
+      bio: 'Certified Ethical Hacker (CEH) and CISSP. 12+ years in cybersecurity, worked with government agencies and Fortune 500 companies.',
+      rating: 4.8,
+      students: 10000,
+      courses: 4
+    },
+    features: [
+      'Virtual hacking labs',
+      'Security tools included',
+      'Certification preparation',
+      'Real-world scenarios',
+      'Incident response guides',
+      'Legal and compliance training'
+    ],
+    requirements: [
+      'Basic networking knowledge',
+      'Familiarity with Linux',
+      'Problem-solving mindset'
+    ],
+    whatYouLearn: [
+      'Network security fundamentals',
+      'Web application security',
+      'Penetration testing methodology',
+      'Malware analysis basics',
+      'Cryptography and encryption',
+      'Security compliance and auditing'
+    ],
+    curriculum: [
+      {
+        id: 1,
+        title: 'Security Foundations',
+        duration: '5 hours',
+        lessons: [
+          { title: 'Introduction to Cybersecurity', duration: '25:00', preview: true },
+          { title: 'Types of Cyber Threats', duration: '35:00', preview: true },
+          { title: 'Security Principles (CIA Triad)', duration: '30:00', preview: false },
+          { title: 'Risk Assessment', duration: '40:00', preview: false }
+        ]
+      },
+      {
+        id: 2,
+        title: 'Network Security',
+        duration: '10 hours',
+        lessons: [
+          { title: 'TCP/IP and OSI Model', duration: '50:00', preview: false },
+          { title: 'Firewall Configuration', duration: '60:00', preview: false },
+          { title: 'VPN and Encryption', duration: '55:00', preview: false },
+          { title: 'Wireless Security', duration: '65:00', preview: false }
+        ]
+      },
+      {
+        id: 3,
+        title: 'Ethical Hacking',
+        duration: '13 hours',
+        lessons: [
+          { title: 'Reconnaissance and Footprinting', duration: '70:00', preview: false },
+          { title: 'Scanning and Enumeration', duration: '80:00', preview: false },
+          { title: 'Exploitation Techniques', duration: '90:00', preview: false },
+          { title: 'Post-Exploitation', duration: '85:00', preview: false }
+        ]
+      },
+      {
+        id: 4,
+        title: 'Defense and Response',
+        duration: '10 hours',
+        lessons: [
+          { title: 'Intrusion Detection Systems', duration: '60:00', preview: false },
+          { title: 'Incident Response Planning', duration: '70:00', preview: false },
+          { title: 'Digital Forensics Basics', duration: '65:00', preview: false },
+          { title: 'Security Best Practices', duration: '55:00', preview: false }
+        ]
+      }
+    ]
   }
-
-  useEffect(() => {
-    // Load Razorpay script
-    const script = document.createElement('script')
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
-    script.async = true
-    document.body.appendChild(script)
-  }, [])
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20">
-      {/* Animated Header */}
-      <motion.div
-        style={{ opacity: headerOpacity, scale: headerScale }}
-        className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 text-white"
-      >
-        <div className="absolute inset-0">
-          <motion.div
-            className="absolute top-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl"
-            animate={{
-              x: [0, 100, 0],
-              y: [0, 50, 0],
-            }}
-            transition={{
-              duration: 20,
-              repeat: Infinity,
-              repeatType: "loop",
-            }}
-          />
-          <motion.div
-            className="absolute bottom-0 right-0 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl"
-            animate={{
-              x: [0, -50, 0],
-              y: [0, -100, 0],
-            }}
-            transition={{
-              duration: 15,
-              repeat: Infinity,
-              repeatType: "loop",
-            }}
-          />
-        </div>
-
-        <div className="relative z-10 max-w-7xl mx-auto px-4 py-12">
-          <button
-            onClick={() => router.push('/courses')}
-            className="flex items-center gap-2 text-white/90 hover:text-white mb-6 transition-colors group"
-          >
-            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-            Back to Courses
-          </button>
-
-          <div className="flex items-center gap-3 mb-4">
-            {course.trending && (
-              <div className="flex items-center gap-2 px-4 py-2 bg-orange-500/90 backdrop-blur-sm rounded-full text-sm font-bold">
-                <TrendingUp className="w-4 h-4" />
-                Trending
-              </div>
-            )}
-            {course.featured && (
-              <div className="flex items-center gap-2 px-4 py-2 bg-yellow-500/90 backdrop-blur-sm rounded-full text-sm font-bold">
-                <Award className="w-4 h-4" />
-                Featured
-              </div>
-            )}
-          </div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl font-bold mb-4"
-          >
-            {course.title}
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-xl text-white/90 mb-6"
-          >
-            {course.description}
-          </motion.p>
-
-          <div className="flex flex-wrap items-center gap-6 mb-6">
-            <div className="flex items-center gap-2">
-              <div className="flex">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className={`w-5 h-5 ${i < Math.floor(course.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-white/40'}`} />
-                ))}
-              </div>
-              <span className="font-bold">{course.rating}</span>
-              <span className="text-white/80">({course.reviews} reviews)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Users className="w-5 h-5" />
-              <span>{course.students.toLocaleString()} students</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5" />
-              <span>{course.duration}</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <img
-              src={course.instructor.avatar}
-              alt={course.instructor.name}
-              className="w-14 h-14 rounded-full border-2 border-white"
-            />
-            <div>
-              <p className="text-sm text-white/80">Created by</p>
-              <p className="font-bold text-lg">{course.instructor.name}</p>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Main Content Grid */}
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left: 3D Course Card + Course Info */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* 3D Interactive Course Card - Only show if client-side */}
-            {show3D && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-gray-200 dark:border-gray-700"
-              >
-                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-                  <BookOpen className="w-7 h-7 text-primary-500" />
-                  Interactive Course Preview
-                </h2>
-                <div className="h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 flex items-center justify-center">
-                  <div className="text-center">
-                    <PlayCircle className="w-20 h-20 text-primary-500 mx-auto mb-4" />
-                    <p className="text-lg font-semibold">Course Preview</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Click play to watch intro</p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Tabs Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden"
-            >
-              {/* Tab Headers */}
-              <div className="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
-                {[
-                  { id: 'curriculum', label: 'Curriculum', icon: PlayCircle },
-                  { id: 'learn', label: "What You'll Learn", icon: CheckCircle },
-                  { id: 'instructor', label: 'Instructor', icon: Users },
-                  { id: 'reviews', label: 'Reviews', icon: Star },
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex-1 px-6 py-4 font-semibold transition-all flex items-center justify-center gap-2 ${activeTab === tab.id
-                        ? 'text-primary-500 border-b-2 border-primary-500 bg-white dark:bg-gray-900'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                      }`}
-                  >
-                    <tab.icon className="w-5 h-5" />
-                    <span className="hidden md:inline">{tab.label}</span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Tab Content */}
-              <div className="p-8">
-                {activeTab === 'curriculum' && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="space-y-4"
-                  >
-                    <h3 className="text-2xl font-bold mb-6">Course Curriculum</h3>
-                    {course.curriculum.map((section, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow"
-                      >
-                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-6">
-                          <div className="flex items-center justify-between mb-3">
-                            <h4 className="text-lg font-bold">
-                              Section {index + 1}: {section.section}
-                            </h4>
-                            <div className="flex items-center gap-4 text-sm">
-                              <span className="px-3 py-1 bg-blue-500 text-white rounded-full font-semibold">
-                                {section.lessons} lessons
-                              </span>
-                              <span className="text-gray-600 dark:text-gray-400">{section.duration}</span>
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            {section.topics.map((topic, topicIndex) => (
-                              <div
-                                key={topicIndex}
-                                className="flex items-center gap-3 text-gray-700 dark:text-gray-300 py-2"
-                              >
-                                <PlayCircle className="w-4 h-4 text-primary-500" />
-                                <span>{topic}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                )}
-
-                {activeTab === 'learn' && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                  >
-                    <h3 className="text-2xl font-bold mb-6">What You'll Learn</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {course.whatYouLearn.map((item, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: index * 0.1 }}
-                          className="flex items-start gap-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl"
-                        >
-                          <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" />
-                          <span className="text-gray-700 dark:text-gray-300">{item}</span>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-
-                {activeTab === 'instructor' && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                  >
-                    <h3 className="text-2xl font-bold mb-6">Meet Your Instructor</h3>
-                    <div className="flex items-start gap-6">
-                      <motion.img
-                        whileHover={{ scale: 1.05 }}
-                        src={course.instructor.avatar}
-                        alt={course.instructor.name}
-                        className="w-32 h-32 rounded-full border-4 border-primary-500 shadow-xl"
-                      />
-                      <div>
-                        <h4 className="text-3xl font-bold mb-2">{course.instructor.name}</h4>
-                        <p className="text-primary-500 font-semibold text-lg mb-3">{course.instructor.title}</p>
-                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
-                          {course.instructor.bio}
-                        </p>
-                        <div className="flex items-center gap-4">
-                          <div className="px-4 py-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                            <p className="text-sm text-gray-600 dark:text-gray-400">Students</p>
-                            <p className="text-xl font-bold text-blue-600">15k+</p>
-                          </div>
-                          <div className="px-4 py-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                            <p className="text-sm text-gray-600 dark:text-gray-400">Courses</p>
-                            <p className="text-xl font-bold text-purple-600">12</p>
-                          </div>
-                          <div className="px-4 py-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                            <p className="text-sm text-gray-600 dark:text-gray-400">Rating</p>
-                            <p className="text-xl font-bold text-green-600">4.8★</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-
-                {activeTab === 'reviews' && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                  >
-                    <h3 className="text-2xl font-bold mb-6">Student Reviews</h3>
-                    <div className="space-y-4">
-                      {[1, 2, 3].map((_, index) => (
-                        <div key={index} className="p-6 bg-gray-50 dark:bg-gray-800 rounded-2xl">
-                          <div className="flex items-center gap-4 mb-3">
-                            <img
-                              src={`https://i.pravatar.cc/150?img=${index + 10}`}
-                              alt="User"
-                              className="w-12 h-12 rounded-full"
-                            />
-                            <div>
-                              <p className="font-bold">Student {index + 1}</p>
-                              <div className="flex">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                          <p className="text-gray-700 dark:text-gray-300">
-                            Excellent course! The instructor explains everything clearly and the projects are very practical.
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Right: Sticky Purchase Card */}
-          <div className="lg:col-span-1">
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="sticky top-24 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-gray-200 dark:border-gray-700"
-            >
-              {/* Course Preview Image */}
-              <div className="relative aspect-video mb-6 rounded-2xl overflow-hidden group">
-                <img
-                  src={course.image}
-                  alt={course.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center cursor-pointer"
-                  >
-                    <PlayCircle className="w-8 h-8 text-primary-500" />
-                  </motion.div>
-                </div>
-              </div>
-
-              {/* Price */}
-              <div className="mb-6">
-                <div className="flex items-baseline gap-3 mb-2">
-                  <span className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    ₹{course.price.toLocaleString()}
-                  </span>
-                  <span className="text-xl text-gray-400 line-through">
-                    ₹{course.originalPrice.toLocaleString()}
-                  </span>
-                  <span className="px-3 py-1 bg-green-500 text-white text-sm font-bold rounded-full">
-                    {discount}% OFF
-                  </span>
-                </div>
-                <p className="text-sm text-red-600 dark:text-red-400 font-semibold flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  Limited time offer ends soon!
-                </p>
-              </div>
-
-              {/* Buy Button */}
-              <motion.button
-                whileHover={{ scale: 1.02, boxShadow: '0 20px 40px rgba(99, 102, 241, 0.3)' }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleBuyNow}
-                className="w-full py-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white rounded-xl font-bold text-lg mb-4 shadow-lg flex items-center justify-center gap-3"
-              >
-                <ShoppingCart className="w-5 h-5" />
-                Buy Now
-              </motion.button>
-
-              <p className="text-center text-sm text-gray-600 dark:text-gray-400 mb-6">
-                💯 30-day money-back guarantee
-              </p>
-
-              {/* Features */}
-              <div className="space-y-3 mb-6">
-                {[
-                  { icon: InfinityIcon, text: 'Lifetime access', color: 'text-purple-500' },
-                  { icon: Smartphone, text: 'Mobile & TV access', color: 'text-blue-500' },
-                  { icon: Award, text: 'Certificate of completion', color: 'text-yellow-500' },
-                  { icon: Download, text: `${course.lessons} downloadable resources`, color: 'text-green-500' },
-                  { icon: MessageCircle, text: 'Direct instructor support', color: 'text-pink-500' },
-                ].map((feature, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4 + index * 0.1 }}
-                    className="flex items-center gap-3"
-                  >
-                    <feature.icon className={`w-5 h-5 ${feature.color}`} />
-                    <span className="text-sm font-medium">{feature.text}</span>
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* Course Stats */}
-              <div className="grid grid-cols-2 gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
-                <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl">
-                  <Video className="w-6 h-6 text-blue-500 mx-auto mb-2" />
-                  <p className="text-2xl font-bold">{course.lessons}</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Lessons</p>
-                </div>
-                <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl">
-                  <Clock className="w-6 h-6 text-purple-500 mx-auto mb-2" />
-                  <p className="text-2xl font-bold">{course.duration.split(' ')[0]}</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Hours</p>
-                </div>
-                <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl">
-                  <Users className="w-6 h-6 text-green-500 mx-auto mb-2" />
-                  <p className="text-2xl font-bold">{(course.students / 1000).toFixed(1)}k</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Students</p>
-                </div>
-                <div className="text-center p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 rounded-xl">
-                  <Star className="w-6 h-6 text-yellow-500 mx-auto mb-2" />
-                  <p className="text-2xl font-bold">{course.rating}</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Rating</p>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </div>
-
-      {/* Buy Modal */}
-      {showBuyModal && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={() => setShowBuyModal(false)}
-        >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-gray-900 rounded-3xl p-8 max-w-md w-full shadow-2xl"
-          >
-            <h3 className="text-3xl font-bold mb-6">Complete Your Purchase</h3>
-            <div className="mb-6">
-              <p className="text-gray-600 dark:text-gray-400 mb-2">Course: {course.title}</p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-bold text-primary-500">₹{course.price.toLocaleString()}</span>
-                <span className="text-lg text-gray-400 line-through">₹{course.originalPrice.toLocaleString()}</span>
-              </div>
-            </div>
-
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleRazorpayPayment}
-              className="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-bold text-lg mb-4 flex items-center justify-center gap-2"
-            >
-              <ShoppingCart className="w-5 h-5" />
-              Pay with Razorpay
-            </motion.button>
-
-            <button
-              onClick={() => setShowBuyModal(false)}
-              className="w-full py-3 border-2 border-gray-300 dark:border-gray-700 rounded-xl font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            >
-              Cancel
-            </button>
-
-            <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-4">
-              🔒 Secure payment powered by Razorpay
-            </p>
-          </motion.div>
-        </motion.div>
-      )}
-    </div>
-  )
 }
