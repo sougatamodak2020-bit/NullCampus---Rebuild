@@ -2,13 +2,13 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
 
 interface AuthContextType {
   user: User | null
   loading: boolean
-  signIn: (email: string, password: string) => Promise<void>
+  signIn: (email: string, password: string, referralCode?: string) => Promise<void>
   signUp: (email: string, password: string, referralCode?: string) => Promise<void>
   signOut: () => Promise<void>
   updateProfile: (data: any) => Promise<void>
@@ -20,7 +20,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
-  const searchParams = useSearchParams()
   const supabase = createClientComponentClient()
 
   useEffect(() => {
@@ -46,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [supabase])
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, referralCode?: string) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -64,7 +63,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (!profile || !profile.full_name) {
         // Redirect to create account page if profile not complete
-        const referralCode = searchParams.get('ref')
         router.push(referralCode ? `/create-account?ref=${referralCode}` : '/create-account')
       } else {
         // Redirect to dashboard if profile is complete

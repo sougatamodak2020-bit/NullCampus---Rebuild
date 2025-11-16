@@ -599,3 +599,470 @@ const coursesData = {
     ]
   }
 }
+
+// THIS IS THE MAIN COMPONENT - ADD THIS!
+export default function CoursePage({ params }: { params: { slug: string } }) {
+  const router = useRouter()
+  const [activeTab, setActiveTab] = useState('overview')
+  const [selectedSection, setSelectedSection] = useState<number | null>(null)
+  const [isWishlisted, setIsWishlisted] = useState(false)
+
+  // Get course data
+  const course = coursesData[params.slug as keyof typeof coursesData]
+
+  // If course not found, show 404
+  if (!course) {
+    notFound()
+  }
+
+  const handleEnroll = () => {
+    toast.success('Added to cart! 🛒')
+    // Add enrollment logic here
+  }
+
+  const handleWishlist = () => {
+    setIsWishlisted(!isWishlisted)
+    toast.success(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist! ❤️')
+  }
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: course.title,
+        text: course.description,
+        url: window.location.href,
+      })
+    } else {
+      navigator.clipboard.writeText(window.location.href)
+      toast.success('Link copied to clipboard!')
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      {/* Hero Section */}
+      <div className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white">
+        <div className="absolute inset-0 bg-black/20"></div>
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Back Button */}
+          <Link 
+            href="/courses"
+            className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-8 transition-colors group"
+          >
+            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+            Back to Courses
+          </Link>
+
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Left: Course Info */}
+            <div className="lg:col-span-2">
+              {/* Badges */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                {'trending' in course && course.trending && (
+                  <span className="px-3 py-1 bg-yellow-400 text-yellow-900 rounded-full text-xs font-semibold flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    Trending
+                  </span>
+                )}
+                {'featured' in course && course.featured && (
+                  <span className="px-3 py-1 bg-pink-500 text-white rounded-full text-xs font-semibold flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" />
+                    Featured
+                  </span>
+                )}
+                <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium">
+                  {course.category}
+                </span>
+              </div>
+
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">{course.title}</h1>
+              <p className="text-xl text-white/90 mb-6">{course.subtitle}</p>
+              <p className="text-lg text-white/80 mb-6">{course.longDescription}</p>
+
+              {/* Stats */}
+              <div className="flex flex-wrap gap-6 mb-6">
+                <div className="flex items-center gap-2">
+                  <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                  <span className="font-semibold">{course.rating}</span>
+                  <span className="text-white/70">({course.reviews} reviews)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  <span>{course.enrolled.toLocaleString()} students</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-5 h-5" />
+                  <span>{course.duration}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Globe className="w-5 h-5" />
+                  <span>{course.language}</span>
+                </div>
+              </div>
+
+              {/* Instructor */}
+              <div className="flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                <img
+                  src={course.instructor.avatar}
+                  alt={course.instructor.name}
+                  className="w-16 h-16 rounded-full border-2 border-white/50"
+                />
+                <div>
+                  <p className="text-sm text-white/70">Instructor</p>
+                  <p className="font-semibold text-lg">{course.instructor.name}</p>
+                  <p className="text-sm text-white/80">{course.instructor.title}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Purchase Card */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-2xl shadow-2xl p-6 sticky top-24">
+                <img
+                  src={course.thumbnail}
+                  alt={course.title}
+                  className="w-full aspect-video object-cover rounded-xl mb-6"
+                />
+
+                {/* Price */}
+                <div className="mb-6">
+                  <div className="flex items-baseline gap-3 mb-2">
+                    <span className="text-4xl font-bold text-gray-900">
+                      ₹{course.price}
+                    </span>
+                    <span className="text-xl text-gray-400 line-through">
+                      ₹{course.originalPrice}
+                    </span>
+                  </div>
+                  <p className="text-green-600 font-semibold">
+                    Save ₹{course.originalPrice - course.price} ({Math.round(((course.originalPrice - course.price) / course.originalPrice) * 100)}% OFF)
+                  </p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="space-y-3">
+                  <button
+                    onClick={handleEnroll}
+                    className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                  >
+                    <ShoppingCart className="w-5 h-5" />
+                    Add to Cart
+                  </button>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={handleWishlist}
+                      className={`py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${
+                        isWishlisted
+                          ? 'bg-red-50 text-red-600 border-2 border-red-600'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-red-600' : ''}`} />
+                      Wishlist
+                    </button>
+                    <button
+                      onClick={handleShare}
+                      className="py-3 rounded-xl font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
+                    >
+                      <Share2 className="w-5 h-5" />
+                      Share
+                    </button>
+                  </div>
+                </div>
+
+                {/* Course Includes */}
+                <div className="mt-6 pt-6 border-t">
+                  <p className="font-semibold text-gray-900 mb-3">This course includes:</p>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Video className="w-4 h-4 text-indigo-600" />
+                      {course.lessons} video lessons
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Download className="w-4 h-4 text-indigo-600" />
+                      Downloadable resources
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Award className="w-4 h-4 text-indigo-600" />
+                      Certificate of completion
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Clock className="w-4 h-4 text-indigo-600" />
+                      Lifetime access
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Left: Course Details */}
+          <div className="lg:col-span-2">
+            {/* Tabs */}
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
+              <div className="flex border-b overflow-x-auto">
+                {['overview', 'curriculum', 'instructor', 'reviews'].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-6 py-4 font-semibold capitalize whitespace-nowrap transition-colors ${
+                      activeTab === tab
+                        ? 'text-indigo-600 border-b-2 border-indigo-600'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+
+              <div className="p-8">
+                <AnimatePresence mode="wait">
+                  {activeTab === 'overview' && (
+                    <motion.div
+                      key="overview"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                    >
+                      {/* What You'll Learn */}
+                      <div className="mb-8">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                          <Zap className="w-6 h-6 text-yellow-500" />
+                          What You'll Learn
+                        </h2>
+                        <div className="grid md:grid-cols-2 gap-3">
+                          {course.whatYouLearn.map((item, index) => (
+                            <div key={index} className="flex items-start gap-3">
+                              <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                              <span className="text-gray-700">{item}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Requirements */}
+                      <div className="mb-8">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-4">Requirements</h2>
+                        <ul className="space-y-2">
+                          {course.requirements.map((req, index) => (
+                            <li key={index} className="flex items-start gap-3 text-gray-700">
+                              <span className="text-indigo-600 font-bold">•</span>
+                              {req}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {/* Description */}
+                      <div>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-4">Description</h2>
+                        <p className="text-gray-700 leading-relaxed">{course.description}</p>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {activeTab === 'curriculum' && (
+                    <motion.div
+                      key="curriculum"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                    >
+                      <h2 className="text-2xl font-bold text-gray-900 mb-6">Course Curriculum</h2>
+                      <div className="space-y-4">
+                        {course.curriculum.map((section) => (
+                          <div
+                            key={section.id}
+                            className="border border-gray-200 rounded-xl overflow-hidden"
+                          >
+                            <button
+                              onClick={() =>
+                                setSelectedSection(
+                                  selectedSection === section.id ? null : section.id
+                                )
+                              }
+                              className="w-full px-6 py-4 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between"
+                            >
+                              <div className="flex items-center gap-4">
+                                <BookOpen className="w-5 h-5 text-indigo-600" />
+                                <div className="text-left">
+                                  <h3 className="font-semibold text-gray-900">
+                                    Section {section.id}: {section.title}
+                                  </h3>
+                                  <p className="text-sm text-gray-600">
+                                    {section.lessons.length} lessons • {section.duration}
+                                  </p>
+                                </div>
+                              </div>
+                              <motion.div
+                                animate={{ rotate: selectedSection === section.id ? 180 : 0 }}
+                                transition={{ duration: 0.3 }}
+                              >
+                                <svg
+                                  className="w-5 h-5 text-gray-400"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M19 9l-7 7-7-7"
+                                  />
+                                </svg>
+                              </motion.div>
+                            </button>
+
+                            <AnimatePresence>
+                              {selectedSection === section.id && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: 'auto', opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.3 }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="px-6 py-4 bg-white space-y-3">
+                                    {section.lessons.map((lesson, index) => (
+                                      <div
+                                        key={index}
+                                        className="flex items-center justify-between py-2"
+                                      >
+                                        <div className="flex items-center gap-3">
+                                          {lesson.preview ? (
+                                            <PlayCircle className="w-5 h-5 text-green-500" />
+                                          ) : (
+                                            <Lock className="w-5 h-5 text-gray-400" />
+                                          )}
+                                          <span className="text-gray-700">{lesson.title}</span>
+                                          {lesson.preview && (
+                                            <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                                              Preview
+                                            </span>
+                                          )}
+                                        </div>
+                                        <span className="text-sm text-gray-500">
+                                          {lesson.duration}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {activeTab === 'instructor' && (
+                    <motion.div
+                      key="instructor"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                    >
+                      <div className="flex items-start gap-6">
+                        <img
+                          src={course.instructor.avatar}
+                          alt={course.instructor.name}
+                          className="w-32 h-32 rounded-full border-4 border-indigo-100"
+                        />
+                        <div className="flex-1">
+                          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                            {course.instructor.name}
+                          </h2>
+                          <p className="text-indigo-600 font-medium mb-4">
+                            {course.instructor.title}
+                          </p>
+                          <p className="text-gray-700 mb-6">{course.instructor.bio}</p>
+
+                          <div className="grid grid-cols-3 gap-6">
+                            <div>
+                              <div className="flex items-center gap-2 text-yellow-500 mb-1">
+                                <Star className="w-5 h-5 fill-yellow-500" />
+                                <span className="font-bold text-gray-900">
+                                  {course.instructor.rating}
+                                </span>
+                              </div>
+                              <p className="text-sm text-gray-600">Instructor Rating</p>
+                            </div>
+                            <div>
+                              <p className="font-bold text-gray-900 text-xl mb-1">
+                                {course.instructor.students.toLocaleString()}
+                              </p>
+                              <p className="text-sm text-gray-600">Students</p>
+                            </div>
+                            <div>
+                              <p className="font-bold text-gray-900 text-xl mb-1">
+                                {course.instructor.courses}
+                              </p>
+                              <p className="text-sm text-gray-600">Courses</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {activeTab === 'reviews' && (
+                    <motion.div
+                      key="reviews"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                    >
+                      <div className="text-center py-12">
+                        <Star className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                          {course.rating} out of 5
+                        </h3>
+                        <p className="text-gray-600">
+                          Based on {course.reviews} reviews
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Features */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-24">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Course Features</h3>
+              <div className="space-y-3">
+                {course.features.map((feature, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <FileCheck className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700">{feature}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 pt-6 border-t">
+                <p className="text-sm text-gray-600">
+                  Last updated: <span className="font-medium">{course.lastUpdated}</span>
+                </p>
+                <p className="text-sm text-gray-600 mt-2">
+                  Level: <span className="font-medium">{course.level}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

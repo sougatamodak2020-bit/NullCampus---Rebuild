@@ -1,4 +1,8 @@
-﻿import { ServicesGrid } from "@/components/layout/ServicesGrid"
+﻿// Force dynamic rendering for Supabase data
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
+import { ServicesGrid } from "@/components/layout/ServicesGrid"
 
 export default function ServicesPage() {
   return (

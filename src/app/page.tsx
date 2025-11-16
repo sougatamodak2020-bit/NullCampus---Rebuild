@@ -1,5 +1,11 @@
+// app/page.tsx - Fixed version
 'use client'
 
+// ❌ REMOVE THESE LINES - They don't work with 'use client'
+// export const dynamic = 'force-dynamic'
+// export const revalidate = 0
+
+import { Suspense } from 'react'
 import { HeroSection } from "@/components/layout/HeroSection"
 import { FeaturedCourses } from "@/components/course/FeaturedCourses"
 import { Stats } from "@/components/layout/Stats"
@@ -9,8 +15,9 @@ import { Canvas } from "@react-three/fiber"
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei"
 import { AnimatedTeacher } from "@/components/3d/AnimatedTeacher"
 import { motion } from "framer-motion"
+import { Loader2 } from "lucide-react"
 
-export default function HomePage() {
+function HomePageContent() {
   return (
     <>
       <HeroSection />
@@ -52,5 +59,17 @@ export default function HomePage() {
       <Testimonials />
       <CTASection />
     </>
+  )
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      </div>
+    }>
+      <HomePageContent />
+    </Suspense>
   )
 }

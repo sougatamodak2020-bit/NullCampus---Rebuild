@@ -1,0 +1,23 @@
+﻿NullCampus Deployment Diagnostic Report
+Generated: 2025-11-16 19:22:30
+
+SUMMARY:
+- Total Checks: 29
+- Passed: 21
+- Critical Issues: 3
+- Warnings: 3
+- Success Rate: 72.4%
+
+CRITICAL ISSUES:
+- Missing critical file: src\app\courses\[slug]\page.tsx
+- Critical file missing: src\app\courses\[slug]\page.tsx
+- ESLint errors detected
+
+
+WARNINGS:
+- courses.ts may have non-standard export format
+- Missing Razorpay key in .env.local
+- Code uses 'primary' color but it's not defined in Tailwind config
+
+
+STATUS: NOT READY - FIX CRITICAL ISSUES FIRST
