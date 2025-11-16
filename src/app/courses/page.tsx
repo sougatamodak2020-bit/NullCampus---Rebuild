@@ -2,9 +2,9 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { Clock, Users, Star, TrendingUp, Award, ArrowRight } from 'lucide-react'
+import { Clock, Users, Star, TrendingUp, Award, Zap } from 'lucide-react'
 
-const featuredCourses = [
+const courses = [
   {
     id: 1,
     slug: 'web-development-masterclass',
@@ -46,69 +46,157 @@ const featuredCourses = [
     image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80',
     category: 'Data Science',
     trending: true
+  },
+  {
+    id: 4,
+    slug: 'digital-marketing-complete',
+    title: 'Digital Marketing Complete Course',
+    description: 'SEO, Social Media, Email Marketing, and Content Strategy',
+    instructor: 'Sarah Williams',
+    duration: '35 hours',
+    students: 2100,
+    rating: 4.6,
+    price: 3499,
+    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
+    category: 'Marketing'
+  },
+  {
+    id: 5,
+    slug: 'mobile-app-development',
+    title: 'Mobile App Development',
+    description: 'Build iOS and Android apps with React Native',
+    instructor: 'David Brown',
+    duration: '45 hours',
+    students: 1900,
+    rating: 4.8,
+    price: 5499,
+    image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&q=80',
+    category: 'Development',
+    featured: true
+  },
+  {
+    id: 6,
+    slug: 'cybersecurity-essentials',
+    title: 'Cybersecurity Essentials',
+    description: 'Learn to protect systems and networks from cyber threats',
+    instructor: 'Emily Davis',
+    duration: '38 hours',
+    students: 1600,
+    rating: 4.7,
+    price: 4799,
+    image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80',
+    category: 'Security'
   }
 ]
 
-export function FeaturedCourses() {
+export default function CoursesPage() {
   return (
-    <section className="py-20 px-4 relative">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Animated background gradient */}
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-blue-900/20" />
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-16"
-        >
+          className="absolute top-0 -left-40 w-80 h-80 bg-purple-500/30 rounded-full blur-3xl"
+          animate={{
+            x: [0, 100, 0],
+            y: [0, 50, 0],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        />
+        <motion.div
+          className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"
+          animate={{
+            x: [0, -50, 0],
+            y: [0, -100, 0],
+          }}
+          transition={{
+            duration: 15,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        />
+      </div>
+
+      <div className="py-20 px-4 relative">
+        <div className="max-w-7xl mx-auto">
+          {/* Header with floating elements */}
           <motion.div
-            initial={{ scale: 0 }}
-            whileInView={{ scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="inline-block mb-6"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-20 relative"
           >
-            <div className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white font-semibold text-sm shadow-lg">
-              ⭐ Top Picks
-            </div>
+            <motion.div
+              className="absolute -top-10 left-1/4 w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-600 rounded-2xl rotate-12 opacity-20 blur-sm"
+              animate={{
+                rotate: [12, 25, 12],
+                scale: [1, 1.1, 1],
+              }}
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+              }}
+            />
+            <motion.div
+              className="absolute -top-5 right-1/4 w-16 h-16 bg-gradient-to-br from-pink-400 to-orange-500 rounded-full opacity-20 blur-sm"
+              animate={{
+                y: [0, -20, 0],
+                scale: [1, 1.2, 1],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+              }}
+            />
+            
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className="inline-block mb-6"
+            >
+              <div className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white font-semibold text-sm shadow-lg">
+                <Zap className="inline w-4 h-4 mr-2" />
+                Premium Courses
+              </div>
+            </motion.div>
+
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 relative">
+              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Explore Premium
+              </span>
+              <br />
+              <span className="text-gray-900 dark:text-white">Courses</span>
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
+              Transform your career with industry-leading courses taught by world-class instructors
+            </p>
           </motion.div>
 
-          <h2 className="text-4xl md:text-6xl font-bold mb-6">
-            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Featured
-            </span>
-            <br />
-            <span className="text-gray-900 dark:text-white">Courses</span>
-          </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-            Start learning with our most popular courses
-          </p>
-        </motion.div>
-
-        {/* Courses Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-          {featuredCourses.map((course, index) => (
-            <motion.div
-              key={course.id}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ 
-                duration: 0.5, 
-                delay: index * 0.1,
-                type: "spring",
-                stiffness: 100
-              }}
-              className="group relative"
-            >
-              <Link href={`/courses/${course.slug}`}>
+          {/* Courses Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {courses.map((course, index) => (
+              <Link key={course.id} href={`/courses/${course.slug}`}>
                 <motion.div
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    duration: 0.5, 
+                    delay: index * 0.1,
+                    type: "spring",
+                    stiffness: 100
+                  }}
                   whileHover={{ 
                     scale: 1.05, 
                     y: -12,
                     transition: { duration: 0.3 }
                   }}
                   whileTap={{ scale: 0.98 }}
-                  className="relative bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-200/50 dark:border-gray-700/50 cursor-pointer"
+                  className="group relative bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-200/50 dark:border-gray-700/50"
                 >
                   {/* Badges */}
                   {course.trending && (
@@ -181,16 +269,6 @@ export function FeaturedCourses() {
                         </div>
                       </div>
                     </div>
-
-                    {/* View Course Button */}
-                    <motion.div
-                      className="mt-4 w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      View Course
-                      <ArrowRight className="w-4 h-4" />
-                    </motion.div>
                   </div>
 
                   {/* Hover glow effect */}
@@ -203,30 +281,10 @@ export function FeaturedCourses() {
                   />
                 </motion.div>
               </Link>
-            </motion.div>
-          ))}
+            ))}
+          </div>
         </div>
-
-        {/* View All Courses Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.4 }}
-          className="text-center"
-        >
-          <Link href="/courses">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full text-lg font-semibold shadow-xl inline-flex items-center gap-3"
-            >
-              View All Courses
-              <ArrowRight className="w-5 h-5" />
-            </motion.button>
-          </Link>
-        </motion.div>
       </div>
-    </section>
+    </div>
   )
 }

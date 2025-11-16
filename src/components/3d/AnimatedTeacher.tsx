@@ -1,8 +1,7 @@
 ﻿"use client"
-
 import { useRef, useState } from "react"
 import { useFrame } from "@react-three/fiber"
-import { Box, Sphere, Cylinder, Float, Text3D, Center } from "@react-three/drei"
+import { Box, Sphere, Cylinder, Float } from "@react-three/drei"
 import * as THREE from "three"
 
 export function AnimatedTeacher() {
@@ -16,7 +15,6 @@ export function AnimatedTeacher() {
       if (!hovered) {
         groupRef.current.rotation.y += delta * 0.1
       }
-      
       // Floating animation
       groupRef.current.position.y = Math.sin(state.clock.elapsedTime) * 0.1
       
@@ -34,7 +32,7 @@ export function AnimatedTeacher() {
         ref={groupRef}
         onPointerEnter={() => setHovered(true)}
         onPointerLeave={() => setHovered(false)}
-        scale={1.5}
+        scale={hovered ? 1.6 : 1.5}
       >
         {/* Head */}
         <Sphere args={[0.4, 32, 32]} position={[0, 1.2, 0]}>
@@ -89,23 +87,11 @@ export function AnimatedTeacher() {
           <meshStandardMaterial color="#3b82f6" />
         </Box>
 
-        {/* Speech Bubble when hovered */}
+        {/* Glow effect when hovered */}
         {hovered && (
-          <group position={[0.8, 1.8, 0]}>
-            <Box args={[1.5, 0.6, 0.1]}>
-              <meshStandardMaterial color="white" />
-            </Box>
-            <Center position={[0, 0, 0.06]}>
-              <Text3D
-                font="/fonts/helvetiker_regular.typeface.json"
-                size={0.15}
-                height={0.01}
-              >
-                Ready to learn?
-                <meshStandardMaterial color="#3b82f6" />
-              </Text3D>
-            </Center>
-          </group>
+          <Sphere args={[1, 32, 32]} position={[0, 0.5, 0]}>
+            <meshBasicMaterial color="#3b82f6" transparent opacity={0.1} />
+          </Sphere>
         )}
       </group>
     </Float>

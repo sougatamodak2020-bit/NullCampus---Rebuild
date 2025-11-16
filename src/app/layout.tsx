@@ -1,34 +1,39 @@
-﻿import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import "./globals.css"
-import { Providers } from "@/components/layout/Providers"
-import { Navbar } from "@/components/layout/Navbar"
-import { Footer } from "@/components/layout/Footer"
-import { Toaster } from "react-hot-toast"
+﻿import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import Navbar from "@/components/Navbar";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { Providers } from "@/components/layout/Providers";
+import { Toaster } from "react-hot-toast";
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ 
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
-  title: "NullCampus - Master Skills in 3D",
-  description: "Next-generation e-learning platform with immersive 3D experiences",
-  keywords: "e-learning, online courses, 3D education, programming, AI, design",
-}
+  title: "NullCampus - Learn Without Limits",
+  description: "Transform your skills with expert-led courses",
+};
 
 export default function RootLayout({
   children,
-}: {
-  children: React.ReactNode
-}) {
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${inter.variable} antialiased`}>
         <Providers>
-          <Navbar />
-          <main className="min-h-screen">{children}</main>
-          <Footer />
-          <Toaster position="top-center" />
+          <AuthProvider>
+            <Navbar />
+            <main className="pt-16">
+              {children}
+            </main>
+            <Toaster position="top-center" />
+          </AuthProvider>
         </Providers>
       </body>
     </html>
-  )
+  );
 }

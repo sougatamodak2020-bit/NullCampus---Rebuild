@@ -1,17 +1,41 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-@import "tailwindcss";
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@reference { @theme { --color-primary-500: #6366f1; } }
-
-@layer components {
-  .glass {
-    @apply bg-white/80 backdrop-blur-sm border border-white/20;
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
   }
-  .card {
-    @apply bg-white dark:bg-gray-800 rounded-xl shadow-lg;
+  
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+  }
+  
+  body {
+    @apply bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50 antialiased;
   }
 }
 
-body {
-  @apply font-sans antialiased;
+@layer components {
+  .glass-bg {
+    @apply bg-white/80 dark:bg-black/80 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-lg;
+  }
+  
+  .glass-card {
+    @apply glass-bg p-6 shadow-lg;
+  }
+  
+  .gradient-primary {
+    @apply bg-gradient-to-r from-primary-500 to-primary-700;
+  }
+  
+  .gradient-secondary {
+    @apply bg-gradient-to-r from-secondary-400 to-secondary-600;
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-secondary-500;
+  }
 }
