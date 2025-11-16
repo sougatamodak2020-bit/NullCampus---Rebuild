@@ -11,7 +11,44 @@ import { useRouter } from "next/navigation"
 import { Clock, Users, Star, Award, Globe, PlayCircle } from "lucide-react"
 import toast from "react-hot-toast"
 
-export function CourseDetail({ course }: { course: any }) {
+// Define the Course interface
+interface CourseModule {
+  id: string
+  title: string
+  lessons: any[] // Define lesson structure based on your data
+}
+
+interface CourseTutor {
+  id: string
+  name: string
+  avatar: string
+  title: string
+  bio: string
+  // Add other tutor properties as needed
+}
+
+interface Course {
+  id: string
+  slug: string
+  title: string
+  description: string
+  thumbnail: string
+  price: number
+  duration: string
+  enrolled_count: number
+  rating: number
+  level: "Beginner" | "Intermediate" | "Advanced"
+  tags: string[]
+  tutor: CourseTutor
+  modules: CourseModule[]
+  // Add any other properties your course has
+}
+
+interface CourseDetailProps {
+  course: Course
+}
+
+export function CourseDetail({ course }: CourseDetailProps) {
   const [enrolled, setEnrolled] = useState(false)
   const { user } = useAuthStore()
   const router = useRouter()
@@ -24,6 +61,10 @@ export function CourseDetail({ course }: { course: any }) {
     }
     // Handle enrollment logic
   }
+
+  // Calculate discount percentage (optional enhancement)
+  const originalPrice = course.price * 2
+  const discountPercentage = Math.round(((originalPrice - course.price) / originalPrice) * 100)
 
   return (
     <div className="min-h-screen pt-24 pb-10">
@@ -90,7 +131,7 @@ export function CourseDetail({ course }: { course: any }) {
               >
                 <Users className="w-5 h-5 text-green-600 mx-auto mb-1" />
                 <p className="text-sm text-gray-500">Students</p>
-                <p className="font-semibold">{course.enrolled_count}</p>
+                <p className="font-semibold">{course.enrolled_count.toLocaleString()}</p>
               </motion.div>
               
               <motion.div
@@ -118,8 +159,11 @@ export function CourseDetail({ course }: { course: any }) {
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Course Price</p>
                   <div className="flex items-baseline gap-2">
-                    <p className="text-3xl font-bold text-green-600">₹{course.price}</p>
-                    <p className="text-lg text-gray-400 line-through">₹{course.price * 2}</p>
+                    <p className="text-3xl font-bold text-green-600">₹{course.price.toLocaleString()}</p>
+                    <p className="text-lg text-gray-400 line-through">₹{originalPrice.toLocaleString()}</p>
+                    <span className="ml-2 px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded">
+                      {discountPercentage}% OFF
+                    </span>
                   </div>
                 </div>
                 <div className="text-right">

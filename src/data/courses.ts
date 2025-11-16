@@ -1,4 +1,43 @@
-export const coursesData = {
+// src/data/courses.ts
+
+export interface Course {
+  id: number;
+  slug: string;
+  title: string;
+  description: string;
+  fullDescription: string;
+  instructor: {
+    name: string;
+    title: string;
+    bio: string;
+    avatar: string;
+  };
+  duration: string;
+  students: number;
+  rating: number;
+  reviews: number;
+  price: number;
+  originalPrice: number;
+  image: string;
+  category: string;
+  level: string;
+  language: string;
+  lastUpdated: string;
+  trending?: boolean;
+  featured?: boolean;
+  lessons: number;
+  features: string[];
+  whatYouLearn: string[];
+  requirements: string[];
+  curriculum: {
+    section: string;
+    lessons: number;
+    duration: string;
+    topics: string[];
+  }[];
+}
+
+export const coursesData: Record<string, Course> = {
   'web-development-masterclass': {
     id: 1,
     slug: 'web-development-masterclass',
@@ -22,7 +61,8 @@ export const coursesData = {
     level: 'Beginner to Advanced',
     language: 'English',
     lastUpdated: 'November 2024',
-    trending: true,
+    trending: true,     // ← NOW VALID
+    featured: false,    // ← NOW VALID
     lessons: 156,
     features: [
       '40 hours of on-demand video',
@@ -115,6 +155,7 @@ export const coursesData = {
       }
     ]
   },
+
   'ui-ux-design-fundamentals': {
     id: 2,
     slug: 'ui-ux-design-fundamentals',
@@ -138,7 +179,8 @@ export const coursesData = {
     level: 'Beginner',
     language: 'English',
     lastUpdated: 'October 2024',
-    featured: true,
+    trending: false,
+    featured: true,     // ← NOW VALID
     lessons: 120,
     features: [
       '30 hours of design content',
@@ -231,6 +273,7 @@ export const coursesData = {
       }
     ]
   },
+
   'data-science-python': {
     id: 3,
     slug: 'data-science-python',
@@ -254,7 +297,8 @@ export const coursesData = {
     level: 'Intermediate',
     language: 'English',
     lastUpdated: 'November 2024',
-    trending: true,
+    trending: true,     // ← NOW VALID
+    featured: false,    // ← NOW VALID
     lessons: 180,
     features: [
       '50 hours of comprehensive content',
@@ -347,4 +391,4 @@ export const coursesData = {
       }
     ]
   }
-}
+};

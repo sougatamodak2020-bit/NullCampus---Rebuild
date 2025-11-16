@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useParams, useRouter } from 'next/navigation'
-import { Clock, Users, Star, CheckCircle, PlayCircle, Award, ArrowLeft, Globe, Infinity, Smartphone, Download, TrendingUp, ShoppingCart, BookOpen, Video, FileText, MessageCircle } from 'lucide-react'
+import { Clock, Users, Star, CheckCircle, PlayCircle, Award, ArrowLeft, Globe, Infinity as InfinityIcon, Smartphone, Download, TrendingUp, ShoppingCart, BookOpen, Video, FileText, MessageCircle } from 'lucide-react'
 import { coursesData } from '@/data/courses'
 import dynamic from 'next/dynamic'
 
@@ -13,6 +13,7 @@ const OrbitControls = dynamic(() => import('@react-three/drei').then(mod => mod.
 const Float = dynamic(() => import('@react-three/drei').then(mod => mod.Float), { ssr: false })
 const Box = dynamic(() => import('@react-three/drei').then(mod => mod.Box), { ssr: false })
 const Sphere = dynamic(() => import('@react-three/drei').then(mod => mod.Sphere), { ssr: false })
+
 
 // 3D Course Card Component
 function AnimatedCourseCard() {
@@ -44,7 +45,7 @@ function AnimatedCourseCard() {
         <Box args={[2, 2.8, 0.3]} position={[0, 0, 0]}>
           <meshStandardMaterial color="#4f46e5" roughness={0.3} metalness={0.5} />
         </Box>
-        
+
         {/* Pages effect */}
         {[...Array(5)].map((_, i) => (
           <Box
@@ -76,7 +77,7 @@ export default function CourseDetailPage() {
   const [showBuyModal, setShowBuyModal] = useState(false)
   const [activeTab, setActiveTab] = useState('curriculum')
   const [show3D, setShow3D] = useState(false)
-  
+
   const { scrollY } = useScroll()
   const headerOpacity = useTransform(scrollY, [0, 200], [1, 0.8])
   const headerScale = useTransform(scrollY, [0, 200], [1, 0.95])
@@ -162,6 +163,7 @@ export default function CourseDetailPage() {
             transition={{
               duration: 20,
               repeat: Infinity,
+              repeatType: "loop",
             }}
           />
           <motion.div
@@ -173,6 +175,7 @@ export default function CourseDetailPage() {
             transition={{
               duration: 15,
               repeat: Infinity,
+              repeatType: "loop",
             }}
           />
         </div>
@@ -297,11 +300,10 @@ export default function CourseDetailPage() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex-1 px-6 py-4 font-semibold transition-all flex items-center justify-center gap-2 ${
-                      activeTab === tab.id
+                    className={`flex-1 px-6 py-4 font-semibold transition-all flex items-center justify-center gap-2 ${activeTab === tab.id
                         ? 'text-primary-500 border-b-2 border-primary-500 bg-white dark:bg-gray-900'
                         : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                    }`}
+                      }`}
                   >
                     <tab.icon className="w-5 h-5" />
                     <span className="hidden md:inline">{tab.label}</span>
@@ -514,7 +516,7 @@ export default function CourseDetailPage() {
               {/* Features */}
               <div className="space-y-3 mb-6">
                 {[
-                  { icon: Infinity, text: 'Lifetime access', color: 'text-purple-500' },
+                  { icon: InfinityIcon, text: 'Lifetime access', color: 'text-purple-500' },
                   { icon: Smartphone, text: 'Mobile & TV access', color: 'text-blue-500' },
                   { icon: Award, text: 'Certificate of completion', color: 'text-yellow-500' },
                   { icon: Download, text: `${course.lessons} downloadable resources`, color: 'text-green-500' },
@@ -583,7 +585,7 @@ export default function CourseDetailPage() {
                 <span className="text-lg text-gray-400 line-through">₹{course.originalPrice.toLocaleString()}</span>
               </div>
             </div>
-            
+
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
