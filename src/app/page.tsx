@@ -1,4 +1,4 @@
-// app/page.tsx - With Navigation Fixed
+// app/page.tsx - Fixed Version
 'use client'
 
 import { Suspense } from 'react'
@@ -12,17 +12,10 @@ import { motion } from "framer-motion"
 import { Loader2 } from "lucide-react"
 
 function HomePageContent() {
-  // Smooth scroll function
-  const scrollToFeaturedCourses = () => {
-    const element = document.getElementById('featured-courses')
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
-  }
-
   return (
     <>
-      <HeroSection onStartLearning={scrollToFeaturedCourses} />
+      {/* Removed onStartLearning prop - HeroSection doesn't accept it */}
+      <HeroSection />
       
       {/* 3D Animated Teacher Section */}
       <section className="relative py-20 bg-gradient-to-b from-white to-blue-50 dark:from-gray-900 dark:to-gray-800">
@@ -49,7 +42,7 @@ function HomePageContent() {
         </div>
       </section>
       
-      {/* Add ID for scroll target */}
+      {/* ID kept for potential future use */}
       <div id="featured-courses">
         <FeaturedCourses />
       </div>
