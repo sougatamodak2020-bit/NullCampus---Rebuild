@@ -1,0 +1,82 @@
+﻿'use client'
+
+import React from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { ArrowRight, Users, Clock, Star } from "lucide-react"
+import Link from "next/link"
+
+export default function CoursesPage() {
+  const courses = [
+    { slug: "full-stack-web-development", title: "Full Stack Web Development", instructor: "Alex Johnson", students: 4800, duration: "12 weeks", level: "Beginner to Pro", rating: 4.9 },
+    { slug: "ai-machine-learning-bootcamp", title: "AI & Machine Learning Bootcamp", instructor: "Dr. Sarah Chen", students: 3200, duration: "16 weeks", level: "Intermediate", rating: 5.0 },
+    { slug: "ui-ux-design-masterclass", title: "UI/UX Design Masterclass", instructor: "Emma Davis", students: 5900, duration: "10 weeks", level: "All Levels", rating: 4.8 },
+    { slug: "data-science-python", title: "Data Science with Python", instructor: "Mike Roberts", students: 4100, duration: "14 weeks", level: "Intermediate", rating: 4.9 },
+    { slug: "react-nextjs-advanced", title: "React & Next.js Advanced", instructor: "You!", students: 2800, duration: "8 weeks", level: "Advanced", rating: 5.0 },
+    { slug: "mobile-app-development", title: "Mobile App Development", instructor: "Lisa Wang", students: 3600, duration: "12 weeks", level: "Beginner", rating: 4.7 },
+  ]
+
+  return (
+    <>
+      <section className="relative py-24 bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6">
+            Explore Our <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Courses</span>
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-10">
+            Master in-demand skills with interactive, project-based learning.
+          </p>
+        </div>
+      </section>
+
+      <section className="py-16 bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div><div className="text-5xl font-bold text-blue-600">50+</div><p className="text-gray-600 dark:text-gray-400 mt-2">Live Courses</p></div>
+            <div><div className="text-5xl font-bold text-purple-600">15,000+</div><p className="text-gray-600 dark:text-gray-400 mt-2">Active Students</p></div>
+            <div><div className="text-5xl font-bold text-green-600">320+</div><p className="text-gray-600 dark:text-gray-400 mt-2">Projects Built</p></div>
+            <div><div className="text-5xl font-bold text-orange-600">4.9 <Star className="inline h-6 w-6 text-yellow-500" /></div><p className="text-gray-600 dark:text-gray-400 mt-2">Average Rating</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4">Popular Courses</h2>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {courses.map((course) => (
+              <Card key={course.slug} className="hover:shadow-xl transition-shadow duration-300">
+                <CardHeader>
+                  <div className="bg-gray-200 border-2 border-dashed rounded-xl w-full h-48 mb-4" />
+                  <div className="flex justify-between items-start">
+                    <Badge variant="secondary">{course.level}</Badge>
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                      <span className="font-medium">{course.rating}</span>
+                    </div>
+                  </div>
+                  <CardTitle className="mt-2">{course.title}</CardTitle>
+                  <CardDescription>by {course.instructor}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                    <span className="flex items-center gap-1"><Users className="h-4 w-4" /> {course.students.toLocaleString()}</span>
+                    <span className="flex items-center gap-1"><Clock className="h-4 w-4" /> {course.duration}</span>
+                  </div>
+                  <Button className="w-full mt-6" asChild>
+                    <Link href={`/courses/${course.slug}`}>
+                      View Course <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
+  )
+}

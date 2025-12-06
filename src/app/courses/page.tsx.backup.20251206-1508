@@ -1,0 +1,405 @@
+// src/app/page.tsx
+'use client'
+
+import { Suspense, useRef } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { Float, MeshDistortMaterial, OrbitControls, PerspectiveCamera, Points, PointMaterial, Sparkles, Text3D, Center, Environment } from '@react-three/drei'
+import { motion, useScroll, useTransform, useSpring, useMotionValue, useInView } from 'framer-motion'
+import { Loader2, Star, Users, Award, Clock, ArrowRight, Zap, Sparkles as SparklesIcon, TrendingUp, BookOpen } from 'lucide-react'
+import * as THREE from 'three'
+import { AnimatedTeacher } from '@/components/3d/AnimatedTeacher'
+import { coursesData } from '@/data/courses'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+
+function FloatingShapes() {
+  const torusRef = useRef<THREE.Mesh>(null)
+  const octaRef = useRef<THREE.Mesh>(null)
+  
+  useFrame((state) => {
+    if (torusRef.current) {
+      torusRef.current.rotation.x = state.clock.elapsedTime * 0.2
+      torusRef.current.rotation.y = state.clock.elapsedTime * 0.3
+    }
+    if (octaRef.current) {
+      octaRef.current.rotation.x = -state.clock.elapsedTime * 0.15
+      octaRef.current.rotation.z = state.clock.elapsedTime * 0.2
+    }
+  })
+  
+  return (
+    <>
+      <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
+        <mesh ref={torusRef} position={[-3, 2, -2]}>
+          <torusGeometry args={[1, 0.4, 16, 32]} />
+          <MeshDistortMaterial color="#8b5cf6" distort={0.3} speed={2} roughness={0.2} metalness={0.8} />
+        </mesh>
+      </Float>
+      <Float speed={1.5} rotationIntensity={0.3} floatIntensity={0.3}>
+        <mesh ref={octaRef} position={[3, -1, -1]}>
+          <octahedronGeometry args={[0.8]} />
+          <MeshDistortMaterial color="#ec4899" distort={0.2} speed={1.5} roughness={0.1} metalness={0.9} />
+        </mesh>
+      </Float>
+    </>
+  )
+}
+
+function ParticleField() {
+  const ref = useRef<THREE.Points>(null)
+  const count = 300
+  const positions = new Float32Array(count * 3)
+  
+  for (let i = 0; i < count * 3; i++) {
+    positions[i] = (Math.random() - 0.5) * 10
+  }
+  
+  useFrame((state) => {
+    if (ref.current) {
+      ref.current.rotation.y = state.clock.elapsedTime * 0.05
+      ref.current.rotation.x = state.clock.elapsedTime * 0.03
+    }
+  })
+  
+  return (
+    <Points ref={ref} positions={positions} stride={3} frustumCulled={false}>
+      <PointMaterial transparent color="#8b5cf6" size={0.02} sizeAttenuation depthWrite={false} opacity={0.6} />
+    </Points>
+  )
+}
+
+function Course3DCard({ course, index }: { course: any; index: number }) {
+  const cardRef = useRef<THREE.Group>(null)
+  
+  useFrame((state) => {
+    if (cardRef.current) {
+      cardRef.current.rotation.y = Math.sin(state.clock.elapsedTime + index) * 0.1
+    }
+  })
+  
+  return (
+    <Float speed={1 + index * 0.1} rotationIntensity={0.2} floatIntensity={0.3}>
+      <group ref={cardRef}>
+        <mesh castShadow receiveShadow>
+          <boxGeometry args={[3, 4, 0.3]} />
+          <meshPhysicalMaterial
+            color="#8b5cf6"
+            metalness={0.6}
+            roughness={0.2}
+            clearcoat={1}
+            clearcoatRoughness={0.1}
+            envMapIntensity={1}
+          />
+        </mesh>
+      </group>
+    </Float>
+  )
+}
+
+function AnimatedStats() {
+  const ref = useRef<HTMLDivElement>(null)
+  const isInView = useInView(ref, { once: true })
+  
+  const stats = [
+    { label: 'Active Students', value: 15000, icon: Users },
+    { label: 'Success Rate', value: 96, suffix: '%', icon: TrendingUp },
+    { label: 'Total Courses', value: 50, icon: BookOpen },
+    { label: 'Expert Mentors', value: 20, icon: Award }
+  ]
+  
+  return (
+    <div ref={ref} className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      {stats.map((stat, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, y: 50 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: i * 0.1, type: 'spring', stiffness: 100 }}
+          whileHover={{ scale: 1.05, rotateY: 10 }}
+          className="relative group"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 blur-xl group-hover:blur-2xl transition-all" />
+          <div className="relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+            <stat.icon className="w-8 h-8 text-purple-600 mb-3" />
+            <motion.span
+              className="block text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent"
+              initial={{ opacity: 0 }}
+              animate={isInView ? { opacity: 1 } : {}}
+            >
+              {isInView && (
+                <CountUp end={stat.value} suffix={stat.suffix} />
+              )}
+            </motion.span>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">{stat.label}</p>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  )
+}
+
+function CountUp({ end, suffix = '' }: { end: number; suffix?: string }) {
+  const value = useSpring(0, { damping: 30, stiffness: 100 })
+  const [displayValue, setDisplayValue] = React.useState(0)
+  
+  React.useEffect(() => {
+    value.set(end)
+    const unsubscribe = value.on('change', (v) => setDisplayValue(Math.round(v)))
+    return unsubscribe
+  }, [end, value])
+  
+  return <>{displayValue.toLocaleString()}{suffix}</>
+}
+
+export default function HomePage() {
+  const { scrollYProgress } = useScroll()
+  const heroScale = useTransform(scrollYProgress, [0, 0.3], [1, 0.8])
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0])
+  const router = useRouter()
+  
+  return (
+    <div className="relative overflow-hidden">
+      {/* Hero Section */}
+      <motion.section
+        style={{ scale: heroScale, opacity: heroOpacity }}
+        className="relative min-h-screen flex items-center justify-center px-4"
+      >
+        <div className="absolute inset-0 z-0">
+          <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
+            <PerspectiveCamera makeDefault />
+            <ambientLight intensity={0.4} />
+            <directionalLight position={[10, 10, 5]} intensity={0.8} />
+            <spotLight position={[0, 10, 0]} intensity={0.3} angle={0.3} penumbra={1} />
+            <FloatingShapes />
+            <ParticleField />
+            <Sparkles count={100} scale={10} size={2} speed={0.4} opacity={0.3} color="#8b5cf6" />
+            <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={0.2} />
+          </Canvas>
+        </div>
+        
+        <div className="relative z-10 max-w-5xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-full border border-purple-300/20 mb-6"
+          >
+            <SparklesIcon className="w-5 h-5 text-purple-600" />
+            <span className="text-sm font-semibold text-purple-600">India's #1 Learning Platform</span>
+            <Zap className="w-4 h-4 text-pink-600" />
+          </motion.div>
+          
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+            className="text-6xl md:text-7xl lg:text-8xl font-black mb-8"
+          >
+            <motion.span
+              className="inline-block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"
+              animate={{ backgroundPosition: ['0%', '100%', '0%'] }}
+              transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+              style={{ backgroundSize: '200% 100%' }}
+            >
+              Master Any Skill
+            </motion.span>
+            <br />
+            <span className="text-gray-900 dark:text-white">With AI-Powered Learning</span>
+          </motion.h1>
+          
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
+            className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-10 max-w-3xl mx-auto"
+          >
+            Experience the future of education with 3D interactive lessons, personalized AI tutors, and real-world projects
+          </motion.p>
+          
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.6, type: 'spring', stiffness: 200 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+          >
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => router.push('/courses')}
+              className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl font-bold text-lg shadow-2xl shadow-purple-500/25 flex items-center gap-2 justify-center"
+            >
+              Explore Courses <ArrowRight className="w-5 h-5" />
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-8 py-4 bg-white/10 backdrop-blur-xl text-gray-900 dark:text-white rounded-2xl font-bold text-lg border border-gray-200/20"
+            >
+              Watch Demo
+            </motion.button>
+          </motion.div>
+        </div>
+      </motion.section>
+      
+      {/* 3D Teacher Section */}
+      <section className="relative py-32 bg-gradient-to-b from-white via-purple-50/30 to-pink-50/30 dark:from-gray-900 dark:via-gray-900/50 dark:to-gray-800">
+        <div className="max-w-7xl mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-5xl md:text-6xl font-black mb-6 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Your AI Learning Companion
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300">Interact with our 3D AI teacher</p>
+          </motion.div>
+          
+          <div className="relative h-[600px] rounded-3xl overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100 dark:from-gray-800 dark:to-gray-900">
+            <Canvas shadows>
+              <PerspectiveCamera makeDefault position={[0, 0, 5]} />
+              <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={0.5} />
+              <ambientLight intensity={0.6} />
+              <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
+              <Sparkles count={50} scale={5} size={3} speed={0.3} opacity={0.4} color="#a78bfa" />
+              <AnimatedTeacher />
+            </Canvas>
+          </div>
+        </div>
+      </section>
+      
+      {/* Featured Courses with 3D Cards */}
+      <section className="py-32 bg-gradient-to-b from-white to-purple-50/30 dark:from-gray-800 dark:to-gray-900">
+        <div className="max-w-7xl mx-auto px-4">
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-5xl md:text-6xl font-black text-center mb-16 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+          >
+            Trending Courses
+          </motion.h2>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {Object.values(coursesData).slice(0, 3).map((course, index) => (
+              <motion.div
+                key={course.id}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, type: 'spring' }}
+                whileHover={{ y: -10, rotateY: 5 }}
+                className="relative group cursor-pointer"
+                onClick={() => router.push(`/courses/${course.slug}`)}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-3xl" />
+                <div className="relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-3xl overflow-hidden border border-white/20">
+                  <div className="h-48 bg-gradient-to-br from-purple-500 to-pink-500 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-black/30" />
+                    <motion.div
+                      className="absolute inset-0 flex items-center justify-center"
+                      whileHover={{ scale: 1.1 }}
+                    >
+                      <BookOpen className="w-20 h-20 text-white/80" />
+                    </motion.div>
+                  </div>
+                  <div className="p-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs font-semibold rounded">
+                        {course.category}
+                      </span>
+                      <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-semibold rounded">
+                        {course.level}
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">{course.title}</h3>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">{course.description}</p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-2xl font-bold text-purple-600">₹{course.price}</span>
+                        <span className="text-sm text-gray-400 line-through ml-2">₹{course.originalPrice}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                        <span className="text-sm font-semibold">{course.rating}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+      
+      {/* Animated Stats */}
+      <section className="py-32 bg-gradient-to-b from-purple-50/30 to-white dark:from-gray-900 dark:to-gray-800">
+        <div className="max-w-7xl mx-auto px-4">
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-5xl md:text-6xl font-black text-center mb-16 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent"
+          >
+            Our Impact
+          </motion.h2>
+          <AnimatedStats />
+        </div>
+      </section>
+      
+      {/* Testimonials with 3D Tilt */}
+      <section className="py-32 bg-gradient-to-b from-white to-purple-50/30 dark:from-gray-800 dark:to-gray-900">
+        <div className="max-w-7xl mx-auto px-4">
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-5xl md:text-6xl font-black text-center mb-16 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+          >
+            Student Success Stories
+          </motion.h2>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {[1, 2, 3].map((i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                whileHover={{
+                  scale: 1.05,
+                  rotateX: -5,
+                  rotateY: 5,
+                  transition: { type: 'spring', stiffness: 300 }
+                }}
+                className="relative"
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-pink-600/10 blur-2xl" />
+                <div className="relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl p-8 border border-white/20">
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(5)].map((_, j) => (
+                      <Star key={j} className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                    ))}
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-300 mb-6 italic">
+                    "This platform transformed my career. The 3D interactive lessons made complex concepts easy to understand."
+                  </p>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" />
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white">Student {i}</p>
+                      <p className="text-sm text-gray-500">Software Developer</p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}

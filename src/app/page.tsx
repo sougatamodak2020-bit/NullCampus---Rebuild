@@ -1,9 +1,5 @@
-// app/page.tsx - Fixed version
+// app/page.tsx - With Navigation Fixed
 'use client'
-
-// ❌ REMOVE THESE LINES - They don't work with 'use client'
-// export const dynamic = 'force-dynamic'
-// export const revalidate = 0
 
 import { Suspense } from 'react'
 import { HeroSection } from "@/components/layout/HeroSection"
@@ -11,16 +7,22 @@ import { FeaturedCourses } from "@/components/course/FeaturedCourses"
 import { Stats } from "@/components/layout/Stats"
 import { Testimonials } from "@/components/layout/Testimonials"
 import { CTASection } from "@/components/layout/CTASection"
-import { Canvas } from "@react-three/fiber"
-import { OrbitControls, PerspectiveCamera } from "@react-three/drei"
 import { AnimatedTeacher } from "@/components/3d/AnimatedTeacher"
 import { motion } from "framer-motion"
 import { Loader2 } from "lucide-react"
 
 function HomePageContent() {
+  // Smooth scroll function
+  const scrollToFeaturedCourses = () => {
+    const element = document.getElementById('featured-courses')
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
   return (
     <>
-      <HeroSection />
+      <HeroSection onStartLearning={scrollToFeaturedCourses} />
       
       {/* 3D Animated Teacher Section */}
       <section className="relative py-20 bg-gradient-to-b from-white to-blue-50 dark:from-gray-900 dark:to-gray-800">
@@ -42,19 +44,16 @@ function HomePageContent() {
           </motion.div>
           
           <div className="h-96 md:h-[500px] rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700">
-            <Canvas>
-              <PerspectiveCamera makeDefault position={[0, 0, 5]} />
-              <OrbitControls enableZoom={false} />
-              <ambientLight intensity={0.5} />
-              <directionalLight position={[10, 10, 5]} intensity={1} />
-              <pointLight position={[-10, -10, -5]} intensity={0.5} />
-              <AnimatedTeacher />
-            </Canvas>
+            <AnimatedTeacher />
           </div>
         </div>
       </section>
       
-      <FeaturedCourses />
+      {/* Add ID for scroll target */}
+      <div id="featured-courses">
+        <FeaturedCourses />
+      </div>
+      
       <Stats />
       <Testimonials />
       <CTASection />
