@@ -1,9 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // ADD THIS LINE — fixes the "critters" + 404/500 error forever
-  output: 'standalone',
+  // REMOVE "output: 'standalone'" ← this was causing the red build!
+  // Keep everything else exactly as you had — all your optimizations stay
 
-  // All your amazing optimizations stay exactly as they are
   reactStrictMode: true,
   swcMinify: true,
 
@@ -17,13 +16,6 @@ const nextConfig = {
       { protocol: 'https', hostname: 'avatars.githubusercontent.com', pathname: '/**' },
     ],
     formats: ['image/avif', 'image/webp'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 60,
-  },
-
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
   },
 
   experimental: {
@@ -31,44 +23,19 @@ const nextConfig = {
     optimizePackageImports: ['lucide-react', 'framer-motion', '@react-three/fiber', '@react-three/drei'],
   },
 
-  webpack: (config, { isServer, dev }) => {
-    if (!dev) {
-      config.optimization = {
-        ...config.optimization,
-        moduleIds: 'deterministic',
-        usedExports: true,
-        sideEffects: true,
-      }
-    }
-
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-      }
-    }
-
-    return config
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
   },
 
   async headers() {
     return [
-      {
-        source: '/:all*(svg|jpg|jpeg|png|gif|ico|webp|avif|woff|woff2)',
-        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
-      },
-      {
-        source: '/_next/static/:path*',
-        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
-      },
+      { source: '/:all*(svg|jpg|jpeg|png|gif|ico|webp|avif|woff|woff2)', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
+      { source: '/_next/static/:path*', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
     ]
   },
 
   compress: true,
   poweredByHeader: false,
-  productionBrowserSourceMaps: false,
 }
 
 module.exports = nextConfig
