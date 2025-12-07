@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // REMOVE "output: 'standalone'" ← this was causing the red build!
-  // Keep everything else exactly as you had — all your optimizations stay
-
   reactStrictMode: true,
   swcMinify: true,
 
@@ -19,7 +16,7 @@ const nextConfig = {
   },
 
   experimental: {
-    optimizeCss: true,
+    // REMOVED: optimizeCss: true, ← This was causing the critters error
     optimizePackageImports: ['lucide-react', 'framer-motion', '@react-three/fiber', '@react-three/drei'],
   },
 
@@ -29,8 +26,14 @@ const nextConfig = {
 
   async headers() {
     return [
-      { source: '/:all*(svg|jpg|jpeg|png|gif|ico|webp|avif|woff|woff2)', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
-      { source: '/_next/static/:path*', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
+      { 
+        source: '/:all*(svg|jpg|jpeg|png|gif|ico|webp|avif|woff|woff2)', 
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] 
+      },
+      { 
+        source: '/_next/static/:path*', 
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] 
+      },
     ]
   },
 
